@@ -1,26 +1,29 @@
 {
     "manifest_version": 3,
-    "name": "react-boilerplate",
-    "description": "react-boilerplate for chrome extension",
+    "name": "react-Tabstacker",
+    "description": "react-Tabstacker for chrome extension",
     "version": "1.0.0",
-    "action" : {
+    "action": {
         "default_popup": "popup.html",
         "default_title": "React Boilerplate",
-        "default_icon" : "icon.png"
+        "default_icon": "/icon-16.png"
     },
     "chrome_url_overrides": {
-        "newtab": "newTab.html"
+        "newtab": "popup.html"
     },
     "permissions": [
         "tabs",
         "bookmarks",
         "storage",
-        "identity"
+        "identity",
+        "activeTab",
+        "contextMenus",
+        "webNavigation"
     ],
     "icons": {
-        "16" : "icon.png",
-        "48" : "icon.png",
-        "128" : "icon.png"
+        "16": "/icon-16.png",
+        "48": "/icon-48.png",
+        "128": "/icon-128.png"
     },
     "options_page": "options.html",
     "background": {
@@ -28,8 +31,12 @@
     },
     "content_scripts": [
         {
-            "matches": ["<all_urls>"],
-            "js": ["contentScript.js"]
+            "matches": [
+                "<all_urls>"
+            ],
+            "js": [
+                "contentScript.js"
+            ]
         }
     ]
 }

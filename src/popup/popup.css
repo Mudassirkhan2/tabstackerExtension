@@ -1,4 +1,90 @@
 body {
-    height: 400px;
-    width: 400px;
-}
+    background-color: #8EC5FC;
+    background-image: linear-gradient(62deg, #8EC5FC 0%, #E0C3FC 100%);
+    font-size: 1rem;
+    font-weight: bold;
+    max-width: 90%;
+    margin: 0 auto;
+  }
+
+  img {
+    height: 2rem;
+    width: 2rem;
+    border-radius: 5px;
+  }
+
+  #tabList {
+    list-style-type: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    /* grid-template-columns: 1fr 1fr 1fr ; */
+    gap: 0.5rem;
+  }
+
+  .container {
+    display: flex;
+    gap: 1rem;
+    padding: 0.3rem;
+    min-height: 100vh;
+  }
+
+  .leftbar {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    /* Set the container height to 100vh */
+  }
+
+  .leftbar>div {
+    flex: 1;
+    /* Distribute equal height among child divs */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid #ccc;
+    background: #8EC5FC;
+    /* Optional: Add a border for clarity */
+  }
+
+  li {
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border: 1px solid black;
+    border-radius: 5px;
+    width: 450px;
+  }
+
+  a {
+    text-decoration: none;
+    color: black;
+  }
+
+  span {
+    display: flex;
+    align-items: center;
+  }
+
+  .close-icon {
+    cursor: pointer;
+    margin-left: 8px;
+    width: 16px;
+    height: 16px;
+    color: red;
+  }
+
+  .tab-content {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  .leftbar {
+    width: 25%;
+    min-width: 25%;
+  }
+  .title{
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
