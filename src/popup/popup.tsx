@@ -3,33 +3,56 @@ import './popup.css';
 import closeIcon from '../assets/close-icon.svg';
 // You can use the imported SVG content as a string
 // This will log the SVG content as a string
-
-
+import { HiFolderPlus } from 'react-icons/hi2';
 const Popup = () => {
     const [tabData, setTabData] = useState([]);
+    // current folder
+    const [currentFolder, setCurrentFolder] = useState(0);
+    const [selectedFolder, setSelectedFolder] = useState(0);
+
+    // Function to handle folder click
+    const handleFolderClick = (folderId) => {
+        // Set the selected folder when it's clicked
+        setSelectedFolder(folderId);
+        console.log(folderId)
+        setCurrentFolder(folderId)
+    };
+    // useEffect(() => {
+    //     let timeoutId;
+
+    //     // Function to fetch and filter tabs
+    //     const fetchAndFilterTabs = () => {
+    //         chrome.tabs.query({}, (tabs) => {
+    //             // Filter out tabs with URL "chrome://newtab/"
+    //             const filteredTabs = tabs.filter((tab) => tab.url !== 'chrome://newtab/');
+    //             // Set the filtered tabs in the tabData state
+    //             setTabData(filteredTabs || []);
+    //         });
+    //     };
+
+    //     // Initial fetch of tabs
+    //     fetchAndFilterTabs();
+
+    //     // Listen for updates to tabs and debounce the function
+    //     chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+    //         clearTimeout(timeoutId);
+    //         // Debounce the function to run after 500 milliseconds of no updates
+    //         timeoutId = setTimeout(fetchAndFilterTabs, 500);
+    //     });
+
+    //     // Clean up the timeout when the component unmounts
+    //     return () => clearTimeout(timeoutId);
+    // }, [setTabData]);
     useEffect(() => {
-        chrome.runtime.sendMessage({ action: 'getSavedTabs' }, (response) => {
-            setTabData(response?.tabData || []);
+        chrome.tabs.query({}, (tabs) => {
+            // Filter out tabs with URL "chrome://newtab/"
+            const filteredTabs = tabs.filter((tab) => tab.url !== 'chrome://newtab/');
+
+            // Set the filtered tabs in the tabData state
+            setTabData(filteredTabs || []);
         });
-    }, []);
 
-
-    // const displaySavedTabs = (tabData) => {
-    //     return (
-    //         <ul id="tabList">
-    //             {tabData.map((tab) => (
-    //                 <TabItem
-    //                     key={tab.tabId}
-    //                     tab={tab}
-    //                     closeTab={closeTab}
-    //                     activateTabByURL={activateTabByURL}
-    //                     getFaviconUrl={getFaviconUrl}
-    //                 />
-    //             ))}
-    //             {tabData.length === 0 && <li>No tabs to show</li>}
-    //         </ul>
-    //     );
-    // };
+    }, [setTabData]);
 
     const closeTab = (tabId) => {
         chrome.tabs.remove(tabId);
@@ -55,7 +78,7 @@ const Popup = () => {
                 return URL.createObjectURL(blob);
             } else if (response.status === 404) {
                 // Handle 404 error: return a default favicon URL or null
-                console.error(`Favicon not found for ${url}`);
+                // console.error(`Favicon not found for ${url}`);
                 return 'https://www.google.com/s2/favicons?domain=google.com'; // Replace with your default favicon URL
             } else {
                 // Handle other error cases
@@ -71,17 +94,29 @@ const Popup = () => {
     return (
         <div className="container">
             <div className="leftbar">
-                <div>
-                    Current Tab
+                <div
+                    className={`folder ${selectedFolder === 0 ? "selected" : ""} active:scale-95 active:bg-purple-600`}
+                    onClick={() => handleFolderClick(0)}
+                >
+                    Folder 1
                 </div>
-                <div>
-                    Folder2
+                <div
+                    className={`folder ${selectedFolder === 1 ? "selected" : ""} active:scale-95 active:bg-purple-600`}
+                    onClick={() => handleFolderClick(1)}
+                >
+                    Folder 2
                 </div>
-                <div>
-                    Folder3
+                <div
+                    className={`folder ${selectedFolder === 2 ? "selected" : ""} active:scale-95 active:bg-purple-600`}
+                    onClick={() => handleFolderClick(2)}
+                >
+                    Folder 3
                 </div>
-                <div>
-                    Folder4
+                <div
+                    className={`folder ${selectedFolder === 3 ? "selected" : ""} active:scale-95 active:bg-purple-600`}
+                    onClick={() => handleFolderClick(3)}
+                >
+                    Folder 4
                 </div>
             </div>
             <div className="rightbar">
@@ -94,6 +129,7 @@ const Popup = () => {
                             closeTab={closeTab}
                             activateTabByURL={activateTabByURL}
                             getFaviconUrl={getFaviconUrl}
+                            currentFolder={currentFolder}
                         />
                     ))}
                     {tabData.length === 0 && <li>No tabs to show</li>}
@@ -103,7 +139,7 @@ const Popup = () => {
     );
 };
 
-const TabItem = ({ tab, closeTab, activateTabByURL, getFaviconUrl }) => {
+const TabItem = ({ tab, closeTab, activateTabByURL, getFaviconUrl, currentFolder }) => {
     const [faviconUrl, setFaviconUrl] = useState(null);
 
     useEffect(() => {
@@ -123,9 +159,14 @@ const TabItem = ({ tab, closeTab, activateTabByURL, getFaviconUrl }) => {
             return url; // Return the original URL in case of an error
         }
     }
+    function sendTabToBackend(tabId, tabUrl, tabTitle, currentFolder) {
+        console.log(tabId, tabUrl, tabTitle)
+        chrome.runtime.sendMessage({ action: 'sendTabToBackend', tabId, tabUrl, tabTitle, currentFolder });
+        console.log("sent")
+    }
     const mainSiteName = getMainSiteName(tab.url);
     return (
-        <li className="tab-item">
+        <li className="tab-item relative">
             <div className="tab-content">
                 <img
                     className="w-8 h-8 rounded-md "
@@ -142,13 +183,26 @@ const TabItem = ({ tab, closeTab, activateTabByURL, getFaviconUrl }) => {
                     >
                         {mainSiteName || tab.url}
                     </a>
-                    <img
-                        className="close-icon"
-                        src={closeIcon}
-                        alt="Close"
-                        onClick={() => closeTab(tab.tabId)}
-                    />
+
+
                 </span>
+                <div className="absolute top-4 right-2">
+                    <div className="flex items-center space-x-4">
+                        <img
+                            className="close-icon"
+                            src={closeIcon}
+                            alt="Close"
+                            onClick={() => closeTab(tab.id)}
+                        />
+                        <HiFolderPlus className="w-6 h-6 rounded-md"
+                            onClick={
+                                () => {
+                                    sendTabToBackend(tab.id, tab.url, tab.title, currentFolder);
+                                }
+                            }
+                        />
+                    </div>
+                </div>
             </div>
             <p className=" title">{tab.title}</p>
         </li>

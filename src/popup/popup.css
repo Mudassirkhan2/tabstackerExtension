@@ -42,8 +42,8 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    border: 1px solid #ccc;
-    background: #8EC5FC;
+    border: 1px solid #d07171;
+    margin-bottom: 0.5rem;
     /* Optional: Add a border for clarity */
   }
 
@@ -88,3 +88,9 @@ body {
     white-space: nowrap;
     text-overflow: ellipsis;
   }
+  .selected {
+    background-color: rebeccapurple;
+    color: black;
+    scale: 0.99;
+    transition: all 0.2s ease-in-out;
+}

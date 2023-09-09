@@ -62,6 +62,62 @@ function makeAPICall(token) {
 }
 
 
+// Listen for messages from the popup or content scripts
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.action === 'sendTabToBackend') {
+        const { tabId, tabUrl, tabTitle ,currentFolder} = message;
+        console.log("tabId, tabUrl, tabTitle", tabId, tabUrl, tabTitle)
+        // Send the tab data to your backend
+        sendTabDataToBackend(tabId, tabUrl, tabTitle,currentFolder)
+            .then((response) => {
+                // Handle the response from the backend if needed
+                if (response.success) {
+                    // You can send a response back to the popup or content script if needed
+                    sendResponse({ success: true });
+                } else {
+                    sendResponse({ success: false, error: 'Failed to send tab data to the backend.' });
+                }
+            })
+            .catch((error) => {
+                console.error('Error sending tab data to the backend:', error);
+                sendResponse({ success: false, error: 'Error sending tab data to the backend.' });
+            });
+
+        // Return true to indicate that you will send a response asynchronously
+        return true;
+    }
+});
+
+// Function to send tab data to the backend
+async function sendTabDataToBackend(tabId, url, title,currentFolder) {
+    // Replace with your backend API endpoint
+    const backendEndpoint = `https://tabstacker-backend.onrender.com/usertabs/addtab/${userId}/${currentFolder}`;
+    const token = await chrome.storage.local.get(["token"]);
+    console.log(tabId, url, title, token.token, currentFolder)
+    console.log("userId", userId)
+    // Construct the data to send to the backend
+    const data = {
+        tabId: tabId,
+        url: url,
+        title: title,
+    };
+
+    // Send a POST request to your backend
+    return fetch(backendEndpoint, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            "Authorization": `Bearer ${token.token}`, // Include the token in the Authorization header
+
+        },
+        body: JSON.stringify(data),
+    })
+    .then((response) => response.json())
+    .catch((error) => {
+        throw error;
+    });
+    console.log("object")
+}
 
 // Listener for messages from popup.js
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
