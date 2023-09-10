@@ -44,6 +44,7 @@ body {
     align-items: center;
     border: 1px solid #d07171;
     margin-bottom: 0.5rem;
+    border-radius: 10px;
     /* Optional: Add a border for clarity */
   }
 
@@ -65,32 +66,36 @@ body {
     align-items: center;
   }
 
-  .close-icon {
-    cursor: pointer;
-    margin-left: 8px;
-    width: 16px;
-    height: 16px;
-    color: red;
-  }
-
-  .tab-content {
-    display: flex;
-    gap: 0.5rem;
-    align-items: center;
-  }
-
+ 
   .leftbar {
     width: 25%;
     min-width: 25%;
   }
-  .title{
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-  }
+ 
   .selected {
     background-color: rebeccapurple;
     color: black;
     scale: 0.99;
     transition: all 0.2s ease-in-out;
 }
+
+
+.close-icon {
+  cursor: pointer;
+  margin-left: 8px;
+  width: 16px;
+  height: 16px;
+  color: red;
+}
+
+.tab-content {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+.title{
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
