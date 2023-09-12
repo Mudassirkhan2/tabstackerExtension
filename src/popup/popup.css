@@ -30,7 +30,7 @@ body {
     display: flex;
     gap: 1rem;
     padding: 0.3rem;
-    min-height: 100vh;
+    min-height: 90vh;
   }
 
   .leftbar {

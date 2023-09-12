@@ -113,6 +113,7 @@ async function sendTabDataToBackend(tabId, url, title, currentFolder) {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === 'showSavedTabs') {
         console.log("showSavedTabs running in background")
+        makeAPICall(tokenFirst);
         const { currentFolder } = message;
         // Assuming showSavedTabs is an async function
         showSavedTabs(currentFolder)

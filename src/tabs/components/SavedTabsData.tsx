@@ -3,7 +3,10 @@ import { BsArrowUpRight } from 'react-icons/bs'
 import { MdDelete } from 'react-icons/md'
 const SavedTabsData = ({ tab, getFaviconUrl, currentFolder }) => {
     const [faviconUrl, setFaviconUrl] = useState(null);
-
+    function deleteTabFromBackend(tabId, tabUrl, tabTitle, currentFolder) {
+        console.log(tabId, tabUrl, tabTitle)
+        chrome.runtime.sendMessage({ action: 'deleteTabFromBackend', tabId, tabUrl, tabTitle, currentFolder });
+    }
     useEffect(() => {
         // Fetch and set the favicon URL when the component mounts
         getFaviconUrl(tab.url)
@@ -49,6 +52,11 @@ const SavedTabsData = ({ tab, getFaviconUrl, currentFolder }) => {
                         />
                         <MdDelete className="w-6 h-6 rounded-md cursor-pointer active:text-red-300 hover:text-red-600"
                             title='Delete'
+                            onClick={
+                                () => {
+                                    deleteTabFromBackend(tab.id, tab.url, tab.title, currentFolder);
+                                }
+                            }
                         />
                     </div>
                 </div>

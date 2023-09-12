@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import './popup.css';
 import TabItem from "../tabs/components/TabItem";
 import SavedTabsData from "../tabs/components/SavedTabsData";
+import Navbar from "../tabs/components/Navbar";
+
 const Popup = () => {
     const [tabData, setTabData] = useState([]);
     // current folder
@@ -46,13 +48,10 @@ const Popup = () => {
         chrome.tabs.query({}, (tabs) => {
             // Filter out tabs with URL "chrome://newtab/"
             const filteredTabs = tabs.filter((tab) => tab.url !== 'chrome://newtab/');
-
             // Set the filtered tabs in the tabData state
             setTabData(filteredTabs || []);
         });
-
     }, [setTabData]);
-
     const closeTab = (tabId) => {
         chrome.tabs.remove(tabId);
         chrome.runtime.sendMessage({ action: 'reloadPopup' });
@@ -74,9 +73,13 @@ const Popup = () => {
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         if (message.action === 'sendDataToPopup') {
             const receivedData = message.data;
-            console.log('Received Data in Popup:', receivedData.tabs);
-            setshowSavedTabsData(receivedData.tabs)
-
+            if (receivedData.tabs) {
+                console.log('Received Data in Popup:', receivedData.tabs);
+                setshowSavedTabsData(receivedData.tabs)
+            }
+            else {
+                console.log('Received Data in Popup:', receivedData);
+            }
         }
     });
 
@@ -103,99 +106,102 @@ const Popup = () => {
     };
 
     return (
-        <div className="container">
-            <div className="leftbar">
-                <div
-                    className={`folder ${selectedFolder === 3 ? "selected" : ""} active:scale-95 active:bg-purple-600 gap-4`}
-                    onClick={() => handleFolderClick(3)}
-                >
-                    Current Tabs
-                </div>
-                <div
-                    className={`folder ${selectedFolder === 0 ? "selected" : ""} active:scale-95 active:bg-purple-600 gap-4`}
-                    onClick={() => handleFolderClick(0)}
-                >
-                    <p>Work</p>
-                    <button
-                        onClick={
-                            () => {
-                                handleshowSavedTabs();
-                            }
-                        }
-                        className="active:text-blue-500 hover:text-blue-200"
-                        title="Show saved tabs of Work folder"
+        <main>
+            <Navbar />
+            <div className="container">
+                <div className="leftbar">
+                    <div
+                        className={`folder ${selectedFolder === 3 ? "selected" : ""} active:scale-95 active:bg-purple-600 gap-4`}
+                        onClick={() => handleFolderClick(3)}
                     >
-                        Show
-                    </button>
-                </div>
-                <div
-                    className={`folder ${selectedFolder === 1 ? "selected" : ""} active:scale-95 active:bg-purple-600 gap-4`}
-                    onClick={() => handleFolderClick(1)}
-                >
-                    <p>Music</p>
-                    <button
-                        onClick={
-                            () => {
-                                handleshowSavedTabs();
-                            }
-                        }
-                        className="active:text-blue-500 hover:text-blue-200"
-                        title="Show saved tabs of music folder"
+                        Current Tabs
+                    </div>
+                    <div
+                        className={`folder ${selectedFolder === 0 ? "selected" : ""} active:scale-95 active:bg-purple-600 gap-4`}
+                        onClick={() => handleFolderClick(0)}
                     >
-                        Show
-                    </button>
-                </div>
+                        <p>Work</p>
+                        <button
+                            onClick={
+                                () => {
+                                    handleshowSavedTabs();
+                                }
+                            }
+                            className="active:text-blue-500 hover:text-blue-200"
+                            title="Show saved tabs of Work folder"
+                        >
+                            Show
+                        </button>
+                    </div>
+                    <div
+                        className={`folder ${selectedFolder === 1 ? "selected" : ""} active:scale-95 active:bg-purple-600 gap-4`}
+                        onClick={() => handleFolderClick(1)}
+                    >
+                        <p>Music</p>
+                        <button
+                            onClick={
+                                () => {
+                                    handleshowSavedTabs();
+                                }
+                            }
+                            className="active:text-blue-500 hover:text-blue-200"
+                            title="Show saved tabs of music folder"
+                        >
+                            Show
+                        </button>
+                    </div>
 
-                <div
-                    className={`folder ${selectedFolder === 2 ? "selected" : ""} active:scale-95 active:bg-purple-600 gap-4`}
-                    onClick={() => handleFolderClick(2)}
-                >
-                    Miscellaneous
-                    <button
-                        onClick={
-                            () => {
-                                handleshowSavedTabs();
-                            }
-                        }
-                        className="active:text-blue-500 hover:text-blue-200"
-                        title="Show saved tabs of miscellaneous folder"
+                    <div
+                        className={`folder ${selectedFolder === 2 ? "selected" : ""} active:scale-95 active:bg-purple-600 gap-4`}
+                        onClick={() => handleFolderClick(2)}
                     >
-                        Show
-                    </button>
-                </div>
+                        Miscellaneous
+                        <button
+                            onClick={
+                                () => {
+                                    handleshowSavedTabs();
+                                }
+                            }
+                            className="active:text-blue-500 hover:text-blue-200"
+                            title="Show saved tabs of miscellaneous folder"
+                        >
+                            Show
+                        </button>
+                    </div>
 
-            </div>
-            <div className="rightbar ">
-                <h1>Current Tabs</h1>
-                <ul id="tabList">
-                    {tabData.map((tab) => (
-                        <TabItem
-                            key={tab.tabId}
-                            tab={tab}
-                            closeTab={closeTab}
-                            activateTabByURL={activateTabByURL}
-                            getFaviconUrl={getFaviconUrl}
-                            currentFolder={currentFolder}
-                        />
-                    ))}
-                    {tabData.length === 0 && <li>No tabs to show</li>}
-                </ul>
-                <h1>Saved Tabs</h1>
-                <ul id="tabList">
-                    {
-                        showSavedTabsData.map((tab) => (
-                            <SavedTabsData key={tab.tabId}
+                </div>
+                <div className="rightbar ">
+                    <h1>Current Tabs</h1>
+                    <ul id="tabList">
+                        {tabData.map((tab) => (
+                            <TabItem
+                                key={tab.tabId}
                                 tab={tab}
+                                closeTab={closeTab}
+                                activateTabByURL={activateTabByURL}
                                 getFaviconUrl={getFaviconUrl}
-                                currentFolder={currentFolder} />
-                        ))
-                    }
-                    {showSavedTabsData.length === 0 && <li>No tabs to show</li>}
-                </ul>
+                                currentFolder={currentFolder}
+                            />
+                        ))}
+                        {tabData.length === 0 && <li>No tabs to show</li>}
+                    </ul>
+                    <h1>Saved Tabs</h1>
+                    <ul id="tabList">
+                        {
+                            showSavedTabsData && showSavedTabsData.map((tab) => (
+                                <SavedTabsData key={tab.tabId}
+                                    tab={tab}
+                                    getFaviconUrl={getFaviconUrl}
+                                    currentFolder={currentFolder} />
+                            ))
+                        }
+                        {showSavedTabsData.length === 0 && <li>No tabs to show</li>}
+                    </ul>
 
 
+                </div>
             </div>
-        </div>
+        </main>
     );
 };
 export default Popup;
