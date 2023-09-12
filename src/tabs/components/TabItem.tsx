@@ -45,8 +45,6 @@ const TabItem = ({ tab, closeTab, activateTabByURL, getFaviconUrl, currentFolder
                     >
                         {mainSiteName || tab.url}
                     </a>
-
-
                 </span>
                 <div className="absolute top-4 right-2">
                     <div className="flex items-center space-x-4">
@@ -55,13 +53,15 @@ const TabItem = ({ tab, closeTab, activateTabByURL, getFaviconUrl, currentFolder
                             src={closeIcon}
                             alt="Close"
                             onClick={() => closeTab(tab.id)}
+                            title="Close tab"
                         />
-                        <HiFolderPlus className="w-6 h-6 rounded-md"
+                        <HiFolderPlus className="w-6 h-6 rounded-md cursor-pointer active:text-emerald-300 hover:text-gray-600"
                             onClick={
                                 () => {
                                     sendTabToBackend(tab.id, tab.url, tab.title, currentFolder);
                                 }
                             }
+                            title="Add to folder"
                         />
                     </div>
                 </div>

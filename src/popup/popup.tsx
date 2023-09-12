@@ -115,7 +115,6 @@ const Popup = () => {
                     className={`folder ${selectedFolder === 0 ? "selected" : ""} active:scale-95 active:bg-purple-600 gap-4`}
                     onClick={() => handleFolderClick(0)}
                 >
-
                     <p>Work</p>
                     <button
                         onClick={
@@ -123,7 +122,8 @@ const Popup = () => {
                                 handleshowSavedTabs();
                             }
                         }
-                        className="active:text-blue-500"
+                        className="active:text-blue-500 hover:text-blue-200"
+                        title="Show saved tabs of Work folder"
                     >
                         Show
                     </button>
@@ -139,7 +139,8 @@ const Popup = () => {
                                 handleshowSavedTabs();
                             }
                         }
-                        className="active:text-blue-500"
+                        className="active:text-blue-500 hover:text-blue-200"
+                        title="Show saved tabs of music folder"
                     >
                         Show
                     </button>
@@ -156,14 +157,15 @@ const Popup = () => {
                                 handleshowSavedTabs();
                             }
                         }
-                        className="active:text-blue-500"
+                        className="active:text-blue-500 hover:text-blue-200"
+                        title="Show saved tabs of miscellaneous folder"
                     >
                         Show
                     </button>
                 </div>
 
             </div>
-            <div className="rightbar">
+            <div className="rightbar ">
                 <h1>Current Tabs</h1>
                 <ul id="tabList">
                     {tabData.map((tab) => (
@@ -182,22 +184,10 @@ const Popup = () => {
                 <ul id="tabList">
                     {
                         showSavedTabsData.map((tab) => (
-                            <>
-                                <TabItem
-                                    key={tab.tabId}
-                                    tab={tab}
-                                    closeTab={closeTab}
-                                    activateTabByURL={activateTabByURL}
-                                    getFaviconUrl={getFaviconUrl}
-                                    currentFolder={currentFolder}
-                                />
-                                {/* <SavedTabsData key={tab.tabId}
-                                    tab={tab}
-                                    closeTab={closeTab}
-                                    activateTabByURL={activateTabByURL}
-                                    getFaviconUrl={getFaviconUrl}
-                                    currentFolder={currentFolder} /> */}
-                            </>
+                            <SavedTabsData key={tab.tabId}
+                                tab={tab}
+                                getFaviconUrl={getFaviconUrl}
+                                currentFolder={currentFolder} />
                         ))
                     }
                     {showSavedTabsData.length === 0 && <li>No tabs to show</li>}
