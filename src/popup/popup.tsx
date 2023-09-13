@@ -111,7 +111,7 @@ const Popup = () => {
             <div className="container">
                 <div className="leftbar">
                     <div
-                        className={`folder ${selectedFolder === 3 ? "selected" : ""} active:scale-95 active:bg-purple-600 gap-4`}
+                        className={`folder l ${selectedFolder === 3 ? "selected" : ""} active:scale-95 active:bg-purple-600 gap-4`}
                         onClick={() => handleFolderClick(3)}
                     >
                         Current Tabs
@@ -171,7 +171,7 @@ const Popup = () => {
 
                 </div>
                 <div className="rightbar ">
-                    <h1>Current Tabs</h1>
+                    <h1 className="font-mono text-2xl">Current Tabs</h1>
                     <ul id="tabList">
                         {tabData.map((tab) => (
                             <TabItem
@@ -185,7 +185,7 @@ const Popup = () => {
                         ))}
                         {tabData.length === 0 && <li>No tabs to show</li>}
                     </ul>
-                    <h1>Saved Tabs</h1>
+                    <h1 className="font-mono text-2xl font-bold" >Saved Tabs</h1>
                     <ul id="tabList">
                         {
                             showSavedTabsData && showSavedTabsData.map((tab) => (

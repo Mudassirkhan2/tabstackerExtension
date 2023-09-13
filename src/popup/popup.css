@@ -21,7 +21,7 @@ body {
     /* flex-wrap: wrap; */
     flex-direction: column;
     /* gap: 0.5rem; */
-    max-height: 50vh;
+    max-height: 45vh;
     overflow-y: scroll;
     /* align-items: center; */
   }
@@ -36,20 +36,17 @@ body {
   .leftbar {
     display: flex;
     flex-direction: column;
-    height: 100vh;
-    /* Set the container height to 100vh */
+    height: 90vh;
   }
 
   .leftbar>div {
     flex: 1;
-    /* Distribute equal height among child divs */
     display: flex;
     justify-content: center;
     align-items: center;
     border: 1px solid #d07171;
     margin-bottom: 0.5rem;
     border-radius: 10px;
-    /* Optional: Add a border for clarity */
   }
 
   li {
@@ -104,4 +101,18 @@ body {
 }
 .rightbar{
   width: inherit;
+}
+/* Style the scrollbar */
+::-webkit-scrollbar {
+  width: 12px; /* Width of the scrollbar */
+}
+
+/* Track (the background) */
+::-webkit-scrollbar-track {
+  background: #71d076; /* Background color of the track */
+}
+
+/* Thumb (the draggable part) */
+::-webkit-scrollbar-thumb {
+  background: rgb(216, 170, 53); /* Color of the thumb */
 }

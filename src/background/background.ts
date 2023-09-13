@@ -1,3 +1,9 @@
+chrome.runtime.onInstalled.addListener(function (details) {
+    if (details.reason === 'install') {
+        // Open a new tab with the login page URL
+        chrome.tabs.create({ url: 'https://tabstacker.vercel.app/' });
+    }
+});
 let userId;
 let userName;
 // get token from chrome storage
@@ -59,6 +65,9 @@ function makeAPICall(token) {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     console.log("action fired in background", message.action, userId)
     if (message.action === 'sendTabToBackend') {
+        if (!userId) {
+            makeAPICall(tokenFirst);
+        }
         const { tabId, tabUrl, tabTitle, currentFolder } = message;
         console.log("tabId, tabUrl, tabTitle", tabId, tabUrl, tabTitle)
         // Send the tab data to your backend
@@ -113,7 +122,9 @@ async function sendTabDataToBackend(tabId, url, title, currentFolder) {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === 'showSavedTabs') {
         console.log("showSavedTabs running in background")
-        makeAPICall(tokenFirst);
+        if (!userId) {
+            makeAPICall(tokenFirst);
+        }
         const { currentFolder } = message;
         // Assuming showSavedTabs is an async function
         showSavedTabs(currentFolder)

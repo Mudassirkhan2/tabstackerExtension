@@ -6,23 +6,23 @@
     "action": {
         "default_popup": "popup.html",
         "default_title": "TabStacker",
-        "default_icon": "/icon-16.png"
+        "default_icon": "/LogoIcon.png"
     },
     "chrome_url_overrides": {
         "newtab": "popup.html"
     },
     "permissions": [
         "tabs",
-        "bookmarks",
         "storage",
-        "activeTab",
-        "http://*/*",
-        "https://*/*"
+        "activeTab"
+    ],
+    "host_permissions": [
+        "https://tabstacker.vercel.app/*"
     ],
     "icons": {
-        "16": "/icon-16.png",
-        "48": "/icon-48.png",
-        "128": "/icon-128.png"
+        "16": "/LogoIcon.png",
+        "48": "/LogoIcon.png",
+        "128": "/LogoIcon.png"
     },
     "options_page": "options.html",
     "background": {
@@ -31,8 +31,7 @@
     "content_scripts": [
         {
             "matches": [
-                "http://*/*",
-                "https://*/*"
+                "https://tabstacker.vercel.app/*"
             ],
             "js": [
                 "contentScript.js"
