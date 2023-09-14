@@ -8,7 +8,8 @@ const Popup = () => {
     const [tabData, setTabData] = useState([]);
     // current folder
     const [currentFolder, setCurrentFolder] = useState(0);
-    const [selectedFolder, setSelectedFolder] = useState(0);
+    const [selectedFolder, setSelectedFolder] = useState(3);
+    const [isCurrentTab, setisCurrentTab] = useState(true);
     // show saved tabs
     const [showSavedTabsData, setshowSavedTabsData] = useState([]);
     // Function to handle folder click
@@ -59,6 +60,7 @@ const Popup = () => {
     };
     //  to show saved tabs
     const handleshowSavedTabs = () => {
+        setisCurrentTab(false);
         chrome.runtime.sendMessage({ action: 'showSavedTabs', currentFolder });
     };
     const activateTabByURL = (url) => {
@@ -104,7 +106,9 @@ const Popup = () => {
             return null;
         }
     };
-
+    const handleIsCurrentTabClick = (isCurrentTab) => {
+        setisCurrentTab(isCurrentTab);
+    };
     return (
         <main>
             <Navbar />
@@ -112,7 +116,7 @@ const Popup = () => {
                 <div className="leftbar">
                     <div
                         className={`folder l ${selectedFolder === 3 ? "selected" : ""} active:scale-95 active:bg-purple-600 gap-4`}
-                        onClick={() => handleFolderClick(3)}
+                        onClick={() => handleIsCurrentTabClick(true)}
                     >
                         Current Tabs
                     </div>
@@ -171,34 +175,39 @@ const Popup = () => {
 
                 </div>
                 <div className="rightbar ">
-                    <h1 className="font-mono text-2xl">Current Tabs</h1>
-                    <ul id="tabList">
-                        {tabData.map((tab) => (
-                            <TabItem
-                                key={tab.tabId}
-                                tab={tab}
-                                closeTab={closeTab}
-                                activateTabByURL={activateTabByURL}
-                                getFaviconUrl={getFaviconUrl}
-                                currentFolder={currentFolder}
-                            />
-                        ))}
-                        {tabData.length === 0 && <li>No tabs to show</li>}
-                    </ul>
-                    <h1 className="font-mono text-2xl font-bold" >Saved Tabs</h1>
-                    <ul id="tabList">
-                        {
-                            showSavedTabsData && showSavedTabsData.map((tab) => (
-                                <SavedTabsData key={tab.tabId}
-                                    tab={tab}
-                                    getFaviconUrl={getFaviconUrl}
-                                    currentFolder={currentFolder} />
-                            ))
-                        }
-                        {showSavedTabsData.length === 0 && <li>No tabs to show</li>}
-                    </ul>
-
-
+                    {isCurrentTab ? (
+                        <>
+                            <h1 className="font-mono text-2xl">Current Tabs</h1>
+                            <ul id="tabList">
+                                {tabData.map((tab) => (
+                                    <TabItem
+                                        key={tab.tabId}
+                                        tab={tab}
+                                        closeTab={closeTab}
+                                        activateTabByURL={activateTabByURL}
+                                        getFaviconUrl={getFaviconUrl}
+                                        currentFolder={currentFolder}
+                                    />
+                                ))}
+                                {tabData.length === 0 && <li>No tabs to show</li>}
+                            </ul>
+                        </>
+                    ) : (
+                        <>
+                            <h1 className="font-mono text-2xl font-bold">Saved Tabs</h1>
+                            <ul id="tabList">
+                                {showSavedTabsData && showSavedTabsData.map((tab) => (
+                                    <SavedTabsData
+                                        key={tab.tabId}
+                                        tab={tab}
+                                        getFaviconUrl={getFaviconUrl}
+                                        currentFolder={currentFolder}
+                                    />
+                                ))}
+                                {showSavedTabsData.length === 0 && <li>No tabs to show</li>}
+                            </ul>
+                        </>
+                    )}
                 </div>
             </div>
         </main>

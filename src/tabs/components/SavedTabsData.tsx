@@ -33,7 +33,7 @@ const SavedTabsData = ({ tab, getFaviconUrl, currentFolder }) => {
                     src={faviconUrl || 'https://www.google.com/s2/favicons?domain=google.com'}
                     alt="Favicon"
                 />
-                <span className="tab-info" onClick={
+                <span className="cursor-pointer tab-info" onClick={
                     () => {
                         chrome.tabs.create({ url: tab.url });
                     }

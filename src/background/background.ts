@@ -4,6 +4,9 @@ chrome.runtime.onInstalled.addListener(function (details) {
         chrome.tabs.create({ url: 'https://tabstacker.vercel.app/' });
     }
 });
+// const baseUrl = 'https://tabstacker-backend.onrender.com';
+// local host base url
+const baseUrl = 'http://localhost:8000';
 let userId;
 let userName;
 // get token from chrome storage
@@ -37,7 +40,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 
 
 // Define the URL of your backend API endpoint
-const apiUrl = 'https://tabstacker-backend.onrender.com/user/getuserdetail';
+const apiUrl = `${baseUrl}/user/getuserdetail`;
 function makeAPICall(token) {
     // Make the GET request with the token as a parameter
     fetch(`${apiUrl}?token=${token}`)
@@ -94,7 +97,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 // Function to send tab data to the backend
 async function sendTabDataToBackend(tabId, url, title, currentFolder) {
     // Replace with your backend API endpoint
-    const backendEndpoint = `https://tabstacker-backend.onrender.com/usertabs/addtab/${userId}/${currentFolder}`;
+    const backendEndpoint = `${baseUrl}/usertabs/addtab/${userId}/${currentFolder}`;
     const token = await chrome.storage.local.get(["token"]);
     console.log(tabId, url, title, token.token, currentFolder)
     // Construct the data to send to the backend
@@ -151,7 +154,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 // Function to send tab data to the backend
 async function showSavedTabs(currentFolder) {
     // Replace with your backend API endpoint
-    const backendEndpoint = `https://tabstacker-backend.onrender.com/usertabs/gettabs/${userId}/${currentFolder}`;
+    const backendEndpoint = `${baseUrl}/usertabs/gettabs/${userId}/${currentFolder}`;
     const token = await chrome.storage.local.get(["token"]);
     console.log(token.token, currentFolder)
     console.log("userId", userId)

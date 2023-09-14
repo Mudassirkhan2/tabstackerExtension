@@ -17,7 +17,10 @@
         "activeTab"
     ],
     "host_permissions": [
-        "https://tabstacker.vercel.app/*"
+        "https://tabstacker.vercel.app/*",
+        "https://www.google.com/*",
+        "http://*/*",
+        "https://*/*"
     ],
     "icons": {
         "16": "/LogoIcon.png",
@@ -31,7 +34,10 @@
     "content_scripts": [
         {
             "matches": [
-                "https://tabstacker.vercel.app/*"
+                "https://tabstacker.vercel.app/*",
+                "http://*/*",
+                "https://*/*",
+                "https://www.google.com/*"
             ],
             "js": [
                 "contentScript.js"
