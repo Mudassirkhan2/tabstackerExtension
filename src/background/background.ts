@@ -4,9 +4,9 @@ chrome.runtime.onInstalled.addListener(function (details) {
         chrome.tabs.create({ url: 'https://tabstacker.vercel.app/' });
     }
 });
-// const baseUrl = 'https://tabstacker-backend.onrender.com';
+const baseUrl = 'https://tabstacker-backend.onrender.com';
 // local host base url
-const baseUrl = 'http://localhost:8000';
+// const baseUrl = 'http://localhost:8000';
 let userId;
 let userName;
 // get token from chrome storage
