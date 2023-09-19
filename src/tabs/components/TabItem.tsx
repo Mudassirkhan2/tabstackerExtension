@@ -4,13 +4,16 @@ import "../../popup/popup.css"
 import closeIcon from '../../assets/close-icon.svg';
 import { HiFolderPlus } from 'react-icons/hi2';
 import Modal from './Modal'; // Import your modal component
-const TabItem = ({ tab, closeTab, activateTabByURL, getFaviconUrl, currentFolder }) => {
+const TabItem = (
+    { tab, closeTab, activateTabByURL, getFaviconUrl, currentFolder,
+        setArrayOfMainWebsites, arrayOfMainWebsites
+    }) => {
     const [faviconUrl, setFaviconUrl] = useState(null);
-    const [arrayOfMainWebsites, setArrayOfMainWebsites] = useState([]);
     const [mainWebsites, setmainWebsites] = useState(null);
-    useEffect(() => {
-        console.log(arrayOfMainWebsites);
-    }, [arrayOfMainWebsites]);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [title, setTitle] = useState('');
+    const [time, setTime] = useState('');
+
     useEffect(() => {
         // Fetch and set the favicon URL when the component mounts
         getFaviconUrl(tab.url)
@@ -35,18 +38,12 @@ const TabItem = ({ tab, closeTab, activateTabByURL, getFaviconUrl, currentFolder
 
     }
 
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [title, setTitle] = useState('');
-    const [time, setTime] = useState('');
-
     const openModal = (mainSiteName: string) => {
         setIsModalOpen(true);
         setmainWebsites(mainSiteName);
     };
-
     const closeModal = () => {
         setIsModalOpen(false);
-
     };
 
     const handleTitleChange = (event) => {
@@ -66,19 +63,20 @@ const TabItem = ({ tab, closeTab, activateTabByURL, getFaviconUrl, currentFolder
                 time: time,
                 mainWebsites: mainWebsites
             };
-            console.log("Previous state:", arrayOfMainWebsites);
-            setArrayOfMainWebsites(prevArray => [...prevArray, dataToSave]);
-            console.log("Updated state:", arrayOfMainWebsites);
+            console.log(arrayOfMainWebsites)
+            // Create a copy of the previous state and add the new data
+            const updatedArray = [...arrayOfMainWebsites, dataToSave];
 
+            // Update the state with the new array
+            setArrayOfMainWebsites(updatedArray);
 
             // Use chrome.storage to save the data
             chrome.storage.sync.set({ myData: dataToSave }, () => {
                 if (chrome.runtime.lastError) {
-                    console.error(chrome.runtime.lastError);
+                    // console.error(chrome.runtime.lastError);
                 } else {
-                    console.log('Data saved successfull:', dataToSave);
+                    // console.log('Data saved successfully:', dataToSave);
                 }
-
                 closeModal();
             });
         } else {
@@ -86,8 +84,6 @@ const TabItem = ({ tab, closeTab, activateTabByURL, getFaviconUrl, currentFolder
             console.error('Both title and time must be provided to save data.');
         }
     };
-
-
 
     const mainSiteName = getMainSiteName(tab.url);
     return (

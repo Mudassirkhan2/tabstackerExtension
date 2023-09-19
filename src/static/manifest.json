@@ -13,14 +13,11 @@
     },
     "permissions": [
         "tabs",
-        "storage",
-        "activeTab"
+        "storage"
     ],
     "host_permissions": [
         "https://tabstacker.vercel.app/*",
-        "https://www.google.com/*",
-        "http://*/*",
-        "https://*/*"
+        "<all_urls>"
     ],
     "icons": {
         "16": "/LogoIcon.png",

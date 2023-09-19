@@ -10,6 +10,7 @@ const Popup = () => {
     const [currentFolder, setCurrentFolder] = useState(0);
     const [selectedFolder, setSelectedFolder] = useState(3);
     const [isCurrentTab, setisCurrentTab] = useState(true);
+    const [arrayOfMainWebsites, setArrayOfMainWebsites] = useState([]);
     // show saved tabs
     const [showSavedTabsData, setshowSavedTabsData] = useState([]);
     // Function to handle folder click
@@ -188,6 +189,8 @@ const Popup = () => {
                                         activateTabByURL={activateTabByURL}
                                         getFaviconUrl={getFaviconUrl}
                                         currentFolder={currentFolder}
+                                        arrayOfMainWebsites={arrayOfMainWebsites}
+                                        setArrayOfMainWebsites={setArrayOfMainWebsites}
                                     />
                                 ))}
                                 {tabData.length === 0 && <li>No tabs to show</li>}
