@@ -1,10 +1,16 @@
-
+import { BiTimer } from 'react-icons/bi';
 import React, { useEffect, useState } from "react";
 import "../../popup/popup.css"
 import closeIcon from '../../assets/close-icon.svg';
 import { HiFolderPlus } from 'react-icons/hi2';
+import Modal from './Modal'; // Import your modal component
 const TabItem = ({ tab, closeTab, activateTabByURL, getFaviconUrl, currentFolder }) => {
     const [faviconUrl, setFaviconUrl] = useState(null);
+    const [arrayOfMainWebsites, setArrayOfMainWebsites] = useState([]);
+    const [mainWebsites, setmainWebsites] = useState(null);
+    useEffect(() => {
+        console.log(arrayOfMainWebsites);
+    }, [arrayOfMainWebsites]);
     useEffect(() => {
         // Fetch and set the favicon URL when the component mounts
         getFaviconUrl(tab.url)
@@ -25,7 +31,64 @@ const TabItem = ({ tab, closeTab, activateTabByURL, getFaviconUrl, currentFolder
     function sendTabToBackend(tabId, tabUrl, tabTitle, currentFolder) {
         console.log(tabId, tabUrl, tabTitle)
         chrome.runtime.sendMessage({ action: 'sendTabToBackend', tabId, tabUrl, tabTitle, currentFolder });
+        console.log(arrayOfMainWebsites)
+
     }
+
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [title, setTitle] = useState('');
+    const [time, setTime] = useState('');
+
+    const openModal = (mainSiteName: string) => {
+        setIsModalOpen(true);
+        setmainWebsites(mainSiteName);
+    };
+
+    const closeModal = () => {
+        setIsModalOpen(false);
+
+    };
+
+    const handleTitleChange = (event) => {
+        setTitle(event.target.value);
+    };
+
+    const handleTimeChange = (event) => {
+        setTime(event.target.value);
+    };
+
+    const handleModalSubmit = () => {
+        // Check if both title and time are present
+        if (title && time) {
+            // Get the data you want to save (title and time)
+            const dataToSave = {
+                title: title,
+                time: time,
+                mainWebsites: mainWebsites
+            };
+            console.log("Previous state:", arrayOfMainWebsites);
+            setArrayOfMainWebsites(prevArray => [...prevArray, dataToSave]);
+            console.log("Updated state:", arrayOfMainWebsites);
+
+
+            // Use chrome.storage to save the data
+            chrome.storage.sync.set({ myData: dataToSave }, () => {
+                if (chrome.runtime.lastError) {
+                    console.error(chrome.runtime.lastError);
+                } else {
+                    console.log('Data saved successfull:', dataToSave);
+                }
+
+                closeModal();
+            });
+        } else {
+            // Handle the case where either title or time is missing
+            console.error('Both title and time must be provided to save data.');
+        }
+    };
+
+
+
     const mainSiteName = getMainSiteName(tab.url);
     return (
         <li className="relative tab-item">
@@ -63,6 +126,42 @@ const TabItem = ({ tab, closeTab, activateTabByURL, getFaviconUrl, currentFolder
                             }
                             title="Add to folder"
                         />
+                        <BiTimer className="w-6 h-6 rounded-md cursor-pointer active:text-emerald-300 hover:text-gray-600"
+                            onClick={
+                                () => {
+                                    openModal(mainSiteName)
+                                }
+                            }
+                            title="Open modal to set timer."
+
+                        />
+                        {isModalOpen && (
+                            <Modal isOpen={isModalOpen} onClose={closeModal}>
+                                <div>
+                                    <h2>Set Timer</h2>
+                                    <label htmlFor="title">Title:</label>
+                                    <input
+                                        type="text"
+                                        id="title"
+                                        value={title}
+                                        onChange={handleTitleChange}
+                                    />
+
+                                    <label htmlFor="time">Time (in mins):</label>
+                                    <input
+                                        type="text"
+                                        id="time"
+                                        value={time}
+                                        onChange={handleTimeChange}
+                                    />
+                                    <div id="modal-buttons-div">
+                                        <button className="modal-button" onClick={handleModalSubmit}>Submit</button>
+                                        <button className="modal-button" onClick={closeModal}>Cancel</button>
+                                    </div>
+                                </div>
+                            </Modal>
+                        )}
+
                     </div>
                 </div>
             </div>

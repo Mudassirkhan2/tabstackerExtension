@@ -47,6 +47,7 @@ const Popup = () => {
     // }, [setTabData]);
     useEffect(() => {
         chrome.tabs.query({}, (tabs) => {
+            console.log(tabs)
             // Filter out tabs with URL "chrome://newtab/"
             const filteredTabs = tabs.filter((tab) => tab.url !== 'chrome://newtab/');
             // Set the filtered tabs in the tabData state
