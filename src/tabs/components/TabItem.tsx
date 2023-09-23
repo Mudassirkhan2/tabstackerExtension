@@ -71,11 +71,12 @@ const TabItem = (
             setArrayOfMainWebsites(updatedArray);
 
             // Use chrome.storage to save the data
-            chrome.storage.sync.set({ myData: dataToSave }, () => {
+            chrome.storage.sync.set({ myData: dataToSave, arrayOfMainWebsites: updatedArray }, () => {
                 if (chrome.runtime.lastError) {
-                    // console.error(chrome.runtime.lastError);
+                    console.error(chrome.runtime.lastError);
                 } else {
-                    // console.log('Data saved successfully:', dataToSave);
+                    console.log('Data saved successfully:', dataToSave);
+                    console.log('Array of main websites saved successfully:', updatedArray);
                 }
                 closeModal();
             });

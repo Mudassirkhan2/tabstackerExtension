@@ -111,6 +111,18 @@ const Popup = () => {
     const handleIsCurrentTabClick = (isCurrentTab) => {
         setisCurrentTab(isCurrentTab);
     };
+    const fetchDataFromStorage = () => {
+        chrome.storage.sync.get(['myData', 'arrayOfMainWebsites'], (result) => {
+            if (chrome.runtime.lastError) {
+                console.error(chrome.runtime.lastError);
+            } else {
+                console.log('Data retrieved from Chrome storage (myData):', result.myData);
+                console.log('Data retrieved from Chrome storage (arrayOfMainWebsites):', result.arrayOfMainWebsites);
+            }
+        });
+    };
+    
+    
     return (
         <main>
             <Navbar />
@@ -214,7 +226,9 @@ const Popup = () => {
                     )}
                 </div>
             </div>
+            <button onClick={fetchDataFromStorage}>Fetch Data from Chrome Storage</button>
         </main>
     );
+    
 };
 export default Popup;
