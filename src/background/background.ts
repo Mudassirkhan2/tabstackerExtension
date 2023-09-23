@@ -1,15 +1,16 @@
+// Listen for the onInstalled event and open a new tab with the login page URL if the extension was just installed
 chrome.runtime.onInstalled.addListener(function (details) {
     if (details.reason === 'install') {
-        // Open a new tab with the login page URL
         chrome.tabs.create({ url: 'https://tabstacker.vercel.app/' });
     }
 });
+
+// Define the base URL of the backend API and initialize variables for the user ID and name
 const baseUrl = 'https://tabstacker-backend.onrender.com';
-// local host base url
-// const baseUrl = 'http://localhost:8000';
 let userId;
 let userName;
-// get token from chrome storage
+
+// Get the user's token from Chrome's local storage and call the API to retrieve the user's details
 let tokenFirst;
 getToken();
 function getToken() {
@@ -22,27 +23,26 @@ function getToken() {
         }
     });
 }
+
+// Send a message to the content script to get saved tab data
 let ShowsavedDataResponse;
 chrome.runtime.sendMessage({ type: "getData", ShowsavedDataResponse });
 
-
+// Listen for messages from the content script to get the user's token and call the API to retrieve the user's details
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     if (message.type === "getToken") {
-        // Access the token from localStorage in the content script
         const token = message.token;
         chrome.storage.local.set({ token: token });
         console.log("Token from the webpage:", token);
-        // Call the function with the token
-        console.log("api call")
         makeAPICall(token);
     }
 });
 
-
-// Define the URL of your backend API endpoint
+// Define the URL of the API endpoint for retrieving user details
 const apiUrl = `${baseUrl}/user/getuserdetail`;
+
+// Call the API to retrieve the user's details using the token
 function makeAPICall(token) {
-    // Make the GET request with the token as a parameter
     fetch(`${apiUrl}?token=${token}`)
         .then((response) => {
             if (!response.ok) {
@@ -51,7 +51,6 @@ function makeAPICall(token) {
             return response.json();
         })
         .then((data) => {
-            //   Handle the response data containing userid, name, and email
             const { _id, fullname, email } = data;
             console.log('User ID:', _id);
             console.log('Name:', fullname);
@@ -64,7 +63,7 @@ function makeAPICall(token) {
         });
 }
 
-// Listen for messages from the popup or content scripts
+// Listen for messages from the popup or content scripts to send tab data to the backend
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     console.log("action fired in background", message.action, userId)
     if (message.action === 'sendTabToBackend') {
@@ -73,12 +72,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         }
         const { tabId, tabUrl, tabTitle, currentFolder } = message;
         console.log("tabId, tabUrl, tabTitle", tabId, tabUrl, tabTitle)
-        // Send the tab data to your backend
+        // Send the tab data to the backend
         sendTabDataToBackend(tabId, tabUrl, tabTitle, currentFolder)
             .then((response) => {
-                // Handle the response from the backend if needed
                 if (response.success) {
-                    // You can send a response back to the popup or content script if needed
                     sendResponse({ success: true });
                 } else {
                     sendResponse({ success: false, error: 'Failed to send tab data to the backend.' });
@@ -96,11 +93,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 // Function to send tab data to the backend
 async function sendTabDataToBackend(tabId, url, title, currentFolder) {
-    // Replace with your backend API endpoint
     const backendEndpoint = `${baseUrl}/usertabs/addtab/${userId}/${currentFolder}`;
     const token = await chrome.storage.local.get(["token"]);
     console.log(tabId, url, title, token.token, currentFolder)
-    // Construct the data to send to the backend
     const data = {
         tabId: tabId,
         url: url,
@@ -122,6 +117,8 @@ async function sendTabDataToBackend(tabId, url, title, currentFolder) {
             throw error;
         });
 }
+
+// Listen for messages from the popup or content scripts to show saved tabs
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === 'showSavedTabs') {
         console.log("showSavedTabs running in background")
@@ -129,13 +126,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             makeAPICall(tokenFirst);
         }
         const { currentFolder } = message;
-        // Assuming showSavedTabs is an async function
+        // Send a GET request to the backend to retrieve saved tabs
         showSavedTabs(currentFolder)
             .then((response) => {
                 console.log("response from background", response);
                 ShowsavedDataResponse = response;
                 console.log("ShowsavedDataResponse", ShowsavedDataResponse)
-                // After receiving ShowsavedDataResponse
+                // Send the response to the popup
                 chrome.runtime.sendMessage({ action: 'sendDataToPopup', data: ShowsavedDataResponse });
                 if (response.success) {
                     sendResponse({ success: true });
@@ -151,15 +148,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         return true;
     }
 });
-// Function to send tab data to the backend
+
+// Function to send a GET request to the backend to retrieve saved tabs
 async function showSavedTabs(currentFolder) {
-    // Replace with your backend API endpoint
     const backendEndpoint = `${baseUrl}/usertabs/gettabs/${userId}/${currentFolder}`;
     const token = await chrome.storage.local.get(["token"]);
     console.log(token.token, currentFolder)
     console.log("userId", userId)
-    // Construct the data to send to the backend
-    // Send a POST request to your backend
+    // Send a GET request to your backend
     return fetch(backendEndpoint, {
         method: 'GET',
         headers: {
@@ -172,3 +168,41 @@ async function showSavedTabs(currentFolder) {
             throw error;
         });
 }
+
+// Listen for connections from content scripts and send data to them
+chrome.runtime.onConnect.addListener((port) => {
+    port.onMessage.addListener((message) => {
+      if (message.action === 'requestDataFromBackground') {
+        console.log('Received requestDataFromBackground message from content script');
+        
+        // Fetch data from storage and all currently opened tabs
+        chrome.storage.sync.get(['arrayOfMainWebsites'], (result) => {
+          if (!chrome.runtime.lastError) {
+            const arrayOfMainWebsites = result.arrayOfMainWebsites || [];
+            console.log('Fetched arrayOfMainWebsites:', arrayOfMainWebsites);
+            
+            chrome.tabs.query({}, (tabs) => {
+              console.log('Fetched all currently opened tabs:', tabs);
+  
+              // Send data to the content script
+              port.postMessage({ arrayOfMainWebsites, tabs });
+              console.log('Sent arrayOfMainWebsites and tabs to content script');
+            });
+          } else {
+            console.error('Error fetching data from storage:', chrome.runtime.lastError);
+          }
+        });
+      }
+    });
+  });
+  
+  // Establish a connection with content scripts and send a message to request data
+  chrome.tabs.query({}, (tabs) => {
+    for (const tab of tabs) {
+      const port = chrome.tabs.connect(tab.id, { name: 'content-script' });
+      console.log('Established connection with content script in tab', tab.id);
+      
+      port.postMessage({ action: 'requestDataFromBackground' });
+      console.log('Sent requestDataFromBackground message to content script in tab', tab.id);
+    }
+  });
