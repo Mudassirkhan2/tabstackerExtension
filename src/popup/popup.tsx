@@ -51,6 +51,8 @@ const Popup = () => {
             console.log("tabs", tabs)
             // Filter out tabs with URL "chrome://newtab/"
             const filteredTabs = tabs.filter((tab) => tab.url !== 'chrome://newtab/');
+            // Set the filtered tabs in the tabData state
+            setTabData(filteredTabs || []);
             const activeTab = tabs.filter((tab) => tab.active);
             console.log("activeTab", activeTab)
             // Fetch data from storage and all currently opened tabs
@@ -77,8 +79,7 @@ const Popup = () => {
                     console.error('Error fetching data from storage:', chrome.runtime.lastError);
                 }
             });
-            // Set the filtered tabs in the tabData state
-            setTabData(filteredTabs || []);
+
         });
     }, [setTabData]);
     const closeTab = (tabId) => {
@@ -151,7 +152,7 @@ const Popup = () => {
 
     return (
         <div className=" dark:text-white dark:bg-black">
-            <main className="dark:text-white max-w-[1400px] mx-auto dark:bg-black">
+            <main className="dark:text-white max-w-[1400px] mx-auto ">
                 <Navbar />
                 <div className="container">
                     <div className="leftbar">

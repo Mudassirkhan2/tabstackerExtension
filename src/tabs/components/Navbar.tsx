@@ -3,10 +3,16 @@ import settingsIcon from '../../assets/settings-icon.svg';
 import logoIcon from '../../assets/logoIcon.svg';
 import { useEffect, useState } from 'react';
 import { BsFillMoonStarsFill, BsSun } from 'react-icons/bs';
+import Modal from './Modal'; // Import your modal component
+
 const Navbar = () => {
     const [theme, setTheme] = useState(null)
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [limit, setlimit] = useState(15);
+    const [tabData, setTabData] = useState([]);
 
     useEffect(() => {
+
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
             setTheme('light')
         } else {
@@ -15,6 +21,28 @@ const Navbar = () => {
         const localTheme = window.localStorage.getItem('theme')
         localTheme && setTheme(localTheme)
     }, [])
+
+    useEffect(() => {
+        chrome.tabs.query({}, (tabs) => {
+            console.log("tabs from Navbar", tabs)
+            // get limit from storage
+            chrome.storage.sync.get(['limit'], function (result) {
+                console.log('Value currently is ' + result.limit);
+                setlimit(result.limit)
+                if (tabs.length > result.limit) {
+                    console.log("limit reached", tabs.length, result.limit)
+                    alert(`Limit reached ${tabs.length} tabs are open. Please close some tabs. `);
+                }
+                else {
+                    console.log("limit not reached", tabs.length, result.limit)
+                }
+            });
+            // Filter out tabs with URL "chrome://newtab/"
+            const filteredTabs = tabs.filter((tab) => tab.url !== 'chrome://newtab/');
+            // Set the filtered tabs in the tabData state
+            setTabData(filteredTabs || []);
+        });
+    }, [setTabData]);
     useEffect(() => {
         if (theme === 'light') {
             document.documentElement.classList.remove('dark')
@@ -24,7 +52,6 @@ const Navbar = () => {
             document.documentElement.classList.remove('light')
             document.documentElement.classList.add('dark')
         }
-
     }, [theme])
     // handele the theme
     const handleTheme = () => {
@@ -36,6 +63,24 @@ const Navbar = () => {
             window.localStorage.setItem('theme', 'light')
         }
     }
+    const openModal = () => {
+        setIsModalOpen(true);
+    };
+    const closeModal = () => {
+        setIsModalOpen(false);
+    };
+    const handleModalSubmit = () => {
+        setIsModalOpen(false);
+        console.log(limit)
+        chrome.storage.sync.set({ limit: limit }, function () {
+            console.log('Value is set to ' + limit);
+        })
+
+
+    }
+    const handleLimitChange = (event) => {
+        setlimit(event.target.value);
+    };
     return (
         <nav className='flex items-center justify-between p-4 border-b-2'>
             <div className='flex items-center space-x-2'>
@@ -47,17 +92,47 @@ const Navbar = () => {
                 />
                 <h1 className="text-xl font-bold ">TabStacker</h1>
             </div>
-            <button onClick={handleTheme} className='dark:text-white' >{
+            <div className='space-x-4'>
+                <button
+                    onClick={
+                        () => {
+                            openModal()
+                        }
+                    }
+                    title="Open modal to set limit."
+                    className=' font-extrabold hover:text-gray-600 active:text-amber-200'
+                >Set Limit</button>
+                {isModalOpen && (
+                    <Modal isOpen={isModalOpen} onClose={closeModal}>
+                        <div>
+                            <h2 className='font-mono font-extrabold hover:text-gray-600 active:text-amber-200'>Set Limit</h2>
+                            <label htmlFor="Limit">Set Limit for the tabs:</label>
+                            <input
+                                type="text"
+                                id="Limit"
+                                required
+                                value={limit}
+                                onChange={handleLimitChange}
+                            />
+                            <div id="modal-buttons-div">
+                                <button className="modal-button" onClick={handleModalSubmit} >Submit</button>
+                                <button className="modal-button" onClick={closeModal}>Cancel</button>
+                            </div>
+                        </div>
+                    </Modal>
+                )}
+                <button onClick={handleTheme} className='dark:text-white' >{
 
-                theme === 'light' ? (
-                    <>
+                    theme === 'light' ? (
+                        <>
 
-                        <BsFillMoonStarsFill className='text-lg' />
-                    </>
-                ) : (
-                    <BsSun className='text-lg' />
-                )
-            }</button>
+                            <BsFillMoonStarsFill className='text-lg' />
+                        </>
+                    ) : (
+                        <BsSun className='text-lg' />
+                    )
+                }</button>
+            </div>
             {/* <button>
                 <img
                     className="w-6 h-6 rounded-md cursor-pointer"
