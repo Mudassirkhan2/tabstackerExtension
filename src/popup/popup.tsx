@@ -48,9 +48,35 @@ const Popup = () => {
     // }, [setTabData]);
     useEffect(() => {
         chrome.tabs.query({}, (tabs) => {
-            console.log(tabs)
+            console.log("tabs", tabs)
             // Filter out tabs with URL "chrome://newtab/"
             const filteredTabs = tabs.filter((tab) => tab.url !== 'chrome://newtab/');
+            const activeTab = tabs.filter((tab) => tab.active);
+            console.log("activeTab", activeTab)
+            // Fetch data from storage and all currently opened tabs
+            chrome.storage.sync.get(['arrayOfMainWebsites'], (result) => {
+                if (!chrome.runtime.lastError) {
+                    const arrayOfMainWebsites = result.arrayOfMainWebsites || [];
+                    console.log('Fetched arrayOfMainWebsites:', arrayOfMainWebsites);
+                    console.log('Active tab:', activeTab)
+                    const mainSiteName = getMainSiteName(activeTab[0].url);
+                    function getMainSiteName(url) {
+                        try {
+                            const urlObject = new URL(url);
+                            return urlObject.hostname;
+                        } catch (error) {
+                            console.error(`Error extracting main site name from ${url}: ${error}`);
+                            return url; // Return the original URL in case of an error
+                        }
+                    }
+                    console.log(mainSiteName)
+                    const tabData = arrayOfMainWebsites.find((item) => item['mainWebsites'] === mainSiteName);
+                    console.log("tabdata is", tabData);
+                    console.log(tabData.mainWebsites === mainSiteName)
+                } else {
+                    console.error('Error fetching data from storage:', chrome.runtime.lastError);
+                }
+            });
             // Set the filtered tabs in the tabData state
             setTabData(filteredTabs || []);
         });
@@ -121,114 +147,118 @@ const Popup = () => {
             }
         });
     };
-    
-    
+
+
     return (
-        <main>
-            <Navbar />
-            <div className="container">
-                <div className="leftbar">
-                    <div
-                        className={`folder l ${selectedFolder === 3 ? "selected" : ""} active:scale-95 active:bg-purple-600 gap-4`}
-                        onClick={() => handleIsCurrentTabClick(true)}
-                    >
-                        Current Tabs
-                    </div>
-                    <div
-                        className={`folder ${selectedFolder === 0 ? "selected" : ""} active:scale-95 active:bg-purple-600 gap-4`}
-                        onClick={() => handleFolderClick(0)}
-                    >
-                        <p>Work</p>
-                        <button
-                            onClick={
-                                () => {
-                                    handleshowSavedTabs();
-                                }
-                            }
-                            className="active:text-blue-500 hover:text-blue-200"
-                            title="Show saved tabs of Work folder"
+        <div className=" dark:text-white dark:bg-black">
+            <main className="dark:text-white max-w-[1400px] mx-auto dark:bg-black">
+                <Navbar />
+                <div className="container">
+                    <div className="leftbar">
+                        <div
+                            className={`folder l ${selectedFolder === 3 ? "selected" : ""} active:scale-95 active:bg-purple-600 gap-4`}
+                            onClick={() => handleIsCurrentTabClick(true)}
                         >
-                            Show
-                        </button>
-                    </div>
-                    <div
-                        className={`folder ${selectedFolder === 1 ? "selected" : ""} active:scale-95 active:bg-purple-600 gap-4`}
-                        onClick={() => handleFolderClick(1)}
-                    >
-                        <p>Music</p>
-                        <button
-                            onClick={
-                                () => {
-                                    handleshowSavedTabs();
-                                }
-                            }
-                            className="active:text-blue-500 hover:text-blue-200"
-                            title="Show saved tabs of music folder"
+                            Current Tabs
+                        </div>
+                        <div
+                            className={`folder ${selectedFolder === 0 ? "selected" : ""} active:scale-95 active:bg-purple-600 gap-4`}
+                            onClick={() => handleFolderClick(0)}
                         >
-                            Show
-                        </button>
-                    </div>
+                            <p>Work</p>
+                            <button
+                                onClick={
+                                    () => {
+                                        handleshowSavedTabs();
+                                    }
+                                }
+                                className="active:text-blue-500 hover:text-blue-200"
+                                title="Show saved tabs of Work folder"
+                            >
+                                Show
+                            </button>
+                        </div>
+                        <div
+                            className={`folder ${selectedFolder === 1 ? "selected" : ""} active:scale-95 active:bg-purple-600 gap-4`}
+                            onClick={() => handleFolderClick(1)}
+                        >
+                            <p>Music</p>
+                            <button
+                                onClick={
+                                    () => {
+                                        handleshowSavedTabs();
+                                    }
+                                }
+                                className="active:text-blue-500 hover:text-blue-200"
+                                title="Show saved tabs of music folder"
+                            >
+                                Show
+                            </button>
+                        </div>
 
-                    <div
-                        className={`folder ${selectedFolder === 2 ? "selected" : ""} active:scale-95 active:bg-purple-600 gap-4`}
-                        onClick={() => handleFolderClick(2)}
-                    >
-                        Miscellaneous
-                        <button
-                            onClick={
-                                () => {
-                                    handleshowSavedTabs();
-                                }
-                            }
-                            className="active:text-blue-500 hover:text-blue-200"
-                            title="Show saved tabs of miscellaneous folder"
+                        <div
+                            className={`folder ${selectedFolder === 2 ? "selected" : ""} active:scale-95 active:bg-purple-600 gap-4`}
+                            onClick={() => handleFolderClick(2)}
                         >
-                            Show
-                        </button>
-                    </div>
+                            Miscellaneous
+                            <button
+                                onClick={
+                                    () => {
+                                        handleshowSavedTabs();
+                                    }
+                                }
+                                className="active:text-blue-500 hover:text-blue-200"
+                                title="Show saved tabs of miscellaneous folder"
+                            >
+                                Show
+                            </button>
+                        </div>
 
+                    </div>
+                    <div className="rightbar ">
+                        {isCurrentTab ? (
+                            <>
+                                <h1 className="font-mono text-2xl">Current Tabs</h1>
+                                <ul id="tabList">
+                                    {tabData.map((tab) => (
+                                        <TabItem
+                                            key={tab.tabId}
+                                            tab={tab}
+                                            closeTab={closeTab}
+                                            activateTabByURL={activateTabByURL}
+                                            getFaviconUrl={getFaviconUrl}
+                                            faviconUrlarray={tab.favIconUrl}
+                                            currentFolder={currentFolder}
+                                            arrayOfMainWebsites={arrayOfMainWebsites}
+                                            setArrayOfMainWebsites={setArrayOfMainWebsites}
+                                        />
+                                    ))}
+                                    {tabData.length === 0 && <li>No tabs to show</li>}
+                                </ul>
+                            </>
+                        ) : (
+                            <>
+                                <h1 className="font-mono text-2xl font-bold">Saved Tabs</h1>
+                                <ul id="tabList">
+                                    {showSavedTabsData && showSavedTabsData.map((tab) => (
+                                        <SavedTabsData
+                                            key={tab.tabId}
+                                            tab={tab}
+                                            getFaviconUrl={getFaviconUrl}
+                                            currentFolder={currentFolder}
+                                        />
+                                    ))}
+                                    {showSavedTabsData.length === 0 && <li>No tabs to show</li>}
+                                </ul>
+                            </>
+                        )}
+                    </div>
                 </div>
-                <div className="rightbar ">
-                    {isCurrentTab ? (
-                        <>
-                            <h1 className="font-mono text-2xl">Current Tabs</h1>
-                            <ul id="tabList">
-                                {tabData.map((tab) => (
-                                    <TabItem
-                                        key={tab.tabId}
-                                        tab={tab}
-                                        closeTab={closeTab}
-                                        activateTabByURL={activateTabByURL}
-                                        getFaviconUrl={getFaviconUrl}
-                                        currentFolder={currentFolder}
-                                        arrayOfMainWebsites={arrayOfMainWebsites}
-                                        setArrayOfMainWebsites={setArrayOfMainWebsites}
-                                    />
-                                ))}
-                                {tabData.length === 0 && <li>No tabs to show</li>}
-                            </ul>
-                        </>
-                    ) : (
-                        <>
-                            <h1 className="font-mono text-2xl font-bold">Saved Tabs</h1>
-                            <ul id="tabList">
-                                {showSavedTabsData && showSavedTabsData.map((tab) => (
-                                    <SavedTabsData
-                                        key={tab.tabId}
-                                        tab={tab}
-                                        getFaviconUrl={getFaviconUrl}
-                                        currentFolder={currentFolder}
-                                    />
-                                ))}
-                                {showSavedTabsData.length === 0 && <li>No tabs to show</li>}
-                            </ul>
-                        </>
-                    )}
-                </div>
-            </div>
-            <button onClick={fetchDataFromStorage}>Fetch Data from Chrome Storage</button>
-        </main>
+                <button onClick={fetchDataFromStorage}>Fetch Data from Chrome Storage</button>
+            </main>
+        </div>
+
     );
-    
+
 };
 export default Popup;

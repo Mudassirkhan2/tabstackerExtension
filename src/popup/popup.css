@@ -4,10 +4,9 @@ body {
     /* background-image: linear-gradient(62deg, #8EC5FC 0%, #E0C3FC 100%); */
     font-size: 1rem;
     font-weight: bold;
-    max-width: 90%;
     margin: 0 auto;
   }
-
+  
   img {
     height: 2rem;
     width: 2rem;

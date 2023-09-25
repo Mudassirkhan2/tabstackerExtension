@@ -172,37 +172,37 @@ async function showSavedTabs(currentFolder) {
 // Listen for connections from content scripts and send data to them
 chrome.runtime.onConnect.addListener((port) => {
     port.onMessage.addListener((message) => {
-      if (message.action === 'requestDataFromBackground') {
-        console.log('Received requestDataFromBackground message from content script');
-        
-        // Fetch data from storage and all currently opened tabs
-        chrome.storage.sync.get(['arrayOfMainWebsites'], (result) => {
-          if (!chrome.runtime.lastError) {
-            const arrayOfMainWebsites = result.arrayOfMainWebsites || [];
-            console.log('Fetched arrayOfMainWebsites:', arrayOfMainWebsites);
-            
-            chrome.tabs.query({}, (tabs) => {
-              console.log('Fetched all currently opened tabs:', tabs);
-  
-              // Send data to the content script
-              port.postMessage({ arrayOfMainWebsites, tabs });
-              console.log('Sent arrayOfMainWebsites and tabs to content script');
+        if (message.action === 'requestDataFromBackground') {
+            console.log('Received requestDataFromBackground message from content script');
+
+            // Fetch data from storage and all currently opened tabs
+            chrome.storage.sync.get(['arrayOfMainWebsites'], (result) => {
+                if (!chrome.runtime.lastError) {
+                    const arrayOfMainWebsites = result.arrayOfMainWebsites || [];
+                    console.log('Fetched arrayOfMainWebsites:', arrayOfMainWebsites);
+
+                    chrome.tabs.query({}, (tabs) => {
+                        console.log('Fetched all currently opened tabs:', tabs);
+                        // Send data to the content script
+                        port.postMessage({ arrayOfMainWebsites, tabs });
+                        console.log('Sent arrayOfMainWebsites and tabs to content script');
+                    });
+                } else {
+                    console.error('Error fetching data from storage:', chrome.runtime.lastError);
+                }
             });
-          } else {
-            console.error('Error fetching data from storage:', chrome.runtime.lastError);
-          }
-        });
-      }
+        }
     });
-  });
-  
-  // Establish a connection with content scripts and send a message to request data
-  chrome.tabs.query({}, (tabs) => {
+});
+
+// Establish a connection with content scripts and send a message to request data
+chrome.tabs.query({}, (tabs) => {
     for (const tab of tabs) {
-      const port = chrome.tabs.connect(tab.id, { name: 'content-script' });
-      console.log('Established connection with content script in tab', tab.id);
-      
-      port.postMessage({ action: 'requestDataFromBackground' });
-      console.log('Sent requestDataFromBackground message to content script in tab', tab.id);
+        const port = chrome.tabs.connect(tab.id, { name: 'content-script' });
+        console.log('Established connection with content script in tab', tab.id);
+
+        port.postMessage({ action: 'requestDataFromBackground' });
+        console.log('Sent requestDataFromBackground message to content script in tab', tab.id);
     }
-  });
+});
+

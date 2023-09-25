@@ -6,7 +6,7 @@ import { HiFolderPlus } from 'react-icons/hi2';
 import Modal from './Modal'; // Import your modal component
 const TabItem = (
     { tab, closeTab, activateTabByURL, getFaviconUrl, currentFolder,
-        setArrayOfMainWebsites, arrayOfMainWebsites
+        setArrayOfMainWebsites, arrayOfMainWebsites, faviconUrlarray
     }) => {
     const [faviconUrl, setFaviconUrl] = useState(null);
     const [mainWebsites, setmainWebsites] = useState(null);
@@ -35,7 +35,6 @@ const TabItem = (
         console.log(tabId, tabUrl, tabTitle)
         chrome.runtime.sendMessage({ action: 'sendTabToBackend', tabId, tabUrl, tabTitle, currentFolder });
         console.log(arrayOfMainWebsites)
-
     }
 
     const openModal = (mainSiteName: string) => {
@@ -92,16 +91,17 @@ const TabItem = (
             <div className="tab-content">
                 <img
                     className="w-8 h-8 rounded-md "
-                    src={faviconUrl || 'https://www.google.com/s2/favicons?domain=google.com'}
+                    src={faviconUrlarray || 'https://www.google.com/s2/favicons?domain=google.com'}
                     alt="Favicon"
                 />
-                <span className="tab-info">
+                <span className="tab-info dark:text-white">
                     <a
                         href={tab.url}
                         onClick={(event) => {
                             event.preventDefault();
                             activateTabByURL(tab.url);
                         }}
+                        className='text-gray-700 dark:text-white'
                     >
                         {mainSiteName || tab.url}
                     </a>
