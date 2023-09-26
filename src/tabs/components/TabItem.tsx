@@ -137,9 +137,9 @@ const TabItem = (
                         />
                         {isModalOpen && (
                             <Modal isOpen={isModalOpen} onClose={closeModal}>
-                                <div>
-                                    <h2>Set Timer</h2>
-                                    <label htmlFor="title">Title:</label>
+                                <div className='dark:text-black'>
+                                    <h2 className='dark:text-black'>Set Timer</h2>
+                                    <label htmlFor="title" className='dark:text-black'>Title:</label>
                                     <input
                                         type="text"
                                         id="title"
@@ -147,15 +147,16 @@ const TabItem = (
                                         onChange={handleTitleChange}
                                     />
 
-                                    <label htmlFor="time">Time (in mins):</label>
+                                    <label htmlFor="time" className='dark:text-black'>Time (in mins):</label>
                                     <input
                                         type="text"
                                         id="time"
                                         value={time}
                                         onChange={handleTimeChange}
+                                        className='dark:text-black'
                                     />
                                     <div id="modal-buttons-div">
-                                        <button className="modal-button" onClick={handleModalSubmit}>Submit</button>
+                                        <button className="modal-button dark:text-gray-700" onClick={handleModalSubmit}>Submit</button>
                                         <button className="modal-button" onClick={closeModal}>Cancel</button>
                                     </div>
                                 </div>

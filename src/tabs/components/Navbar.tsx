@@ -31,7 +31,7 @@ const Navbar = () => {
                 setlimit(result.limit)
                 if (tabs.length > result.limit) {
                     console.log("limit reached", tabs.length, result.limit)
-                    alert(`Limit reached ${tabs.length} tabs are open the limit is ${result.limit}. Please close some tabs. `);
+                    toast.info(`Limit reached ${tabs.length} tabs are open the limit is ${result.limit}. Please close some tabs. `)
                 }
                 else {
                     console.log("limit not reached", tabs.length, result.limit)
@@ -85,7 +85,7 @@ const Navbar = () => {
         setlimit(event.target.value);
     };
     return (
-        <nav className='flex items-center justify-between p-4 border-b-2'>
+        <nav className='flex items-center justify-between p-4 border-b-2 '>
             <div className='flex items-center space-x-2'>
                 <img
                     className="rounded-md w-9 h-9"
@@ -95,7 +95,7 @@ const Navbar = () => {
                 />
                 <h1 className="text-xl font-bold ">TabStacker</h1>
             </div>
-            <div className='flex items-center space-x-4'>
+            <div className='flex items-center space-x-4 '>
                 <button
                     onClick={
                         () => {
@@ -107,7 +107,7 @@ const Navbar = () => {
                 >Set Limit</button>
                 {isModalOpen && (
                     <Modal isOpen={isModalOpen} onClose={closeModal}>
-                        <div>
+                        <div className='dark:text-gray-700'>
                             <h2 className='font-mono font-extrabold hover:text-gray-600 active:text-amber-200'>Set Limit</h2>
                             <label htmlFor="Limit">Set Limit for the tabs:</label>
                             <input

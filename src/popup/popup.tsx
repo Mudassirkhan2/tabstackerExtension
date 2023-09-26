@@ -170,7 +170,7 @@ const Popup = () => {
 
 
     return (
-        <div className=" dark:text-white dark:bg-black">
+        <div className="min-h-screen  dark:text-white dark:bg-black dark:bg-gradient-to-tr from-black via-transparent to-gray-700">
             <main className="dark:text-white max-w-[1400px] mx-auto ">
                 <Navbar />
                 <div className="container">
@@ -275,7 +275,6 @@ const Popup = () => {
                         )}
                     </div>
                 </div>
-                <button onClick={fetchDataFromStorage}>Fetch Data from Chrome Storage</button>
             </main>
             <ToastContainer
                 position="bottom-center"
