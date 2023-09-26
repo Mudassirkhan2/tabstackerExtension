@@ -142,3 +142,21 @@ body {
 ::-webkit-scrollbar-thumb:horizontal {
   border-radius: 4px;
 }
+
+/* Hide the scrollbar track and thumb */
+::-webkit-scrollbar {
+  width: 8px; /* Set a very small width */
+}
+
+/* Track (the background) - make it transparent */
+::-webkit-scrollbar-track {
+  background: transparent; /* Set background to transparent */
+}
+
+/* Thumb (the draggable part) */
+::-webkit-scrollbar-thumb {
+  background: transparent; /* Set thumb background to transparent */
+  border-radius: 0; /* Remove any border radius on the thumb */
+}
+
+

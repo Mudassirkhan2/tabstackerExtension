@@ -169,6 +169,77 @@ async function showSavedTabs(currentFolder) {
         });
 }
 
+// Listen for messages from the popup or content scripts to show delete tabs
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    console.log("action fired in background", message.action, userId)
+
+    if (message.action === 'deleteTabFromBackend') {
+        console.log("deleteTabFromBackend running in background")
+        if (!userId) {
+            makeAPICall(tokenFirst);
+        }
+        const { tabID, currentFolder } = message;
+        console.log(message)
+        // Send a GET request to the backend to retrieve saved tabs
+        deleteTabs(tabID, currentFolder)
+            .then((response) => {
+                console.log("response from background", response);
+                // Send a GET request to the backend to retrieve saved tabs
+                showSavedTabs(currentFolder)
+                    .then((response) => {
+                        console.log("response from background", response);
+                        ShowsavedDataResponse = response;
+                        console.log("ShowsavedDataResponse", ShowsavedDataResponse)
+                        // Send the response to the popup
+                        chrome.runtime.sendMessage({ action: 'sendDataToPopup', data: ShowsavedDataResponse });
+                        chrome.runtime.sendMessage({ action: 'deletedSuccessFully ', data: ShowsavedDataResponse });
+                        if (response.success) {
+                            sendResponse({ success: true });
+                        } else {
+                            sendResponse({ success: false, error: 'Failed to send tab data to the backend.' });
+                        }
+                    })
+                    .catch((error) => {
+                        console.error('Error sending tab data to the backend:', error);
+                        sendResponse({ success: false, error: 'Error sending tab data to the backend.' });
+                    });
+                if (response.success) {
+                    sendResponse({ success: true });
+                } else {
+                    sendResponse({ success: false, error: 'Failed to send tab data to the backend.' });
+                }
+            })
+            .catch((error) => {
+                console.error('Error sending tab data to the backend:', error);
+                sendResponse({ success: false, error: 'Error sending tab data to the backend.' });
+            });
+        // Return true to indicate that you will send a response asynchronously
+        return true;
+    }
+});
+// Function to send a GET request to the backend to retrieve delete tabs
+async function deleteTabs(tabID, currentFolder) {
+    // /deletetab/:userId/:folderId/:tabId
+    // /deletetab/:userId/:folderId/:tabId
+    // https://tabstacker-backend.onrender.com/usertabs/deletetab/64fc64751abeaef4f86236ff/0/1942898276
+    const backendEndpoint = `${baseUrl}/usertabs/deletetab/${userId}/${currentFolder}/${tabID}`;
+    const token = await chrome.storage.local.get(["token"]);
+    console.log(token.token, currentFolder)
+    console.log("userId", userId)
+    // Send a GET request to your backend
+    return fetch(backendEndpoint, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+            "Authorization": `Bearer ${token.token}`, // Include the token in the Authorization header
+        },
+    })
+        .then((response) => response.json())
+        .catch((error) => {
+            throw error;
+        });
+}
+
 // Listen for connections from content scripts and send data to them
 chrome.runtime.onConnect.addListener((port) => {
     port.onMessage.addListener((message) => {

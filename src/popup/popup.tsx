@@ -3,7 +3,10 @@ import './popup.css';
 import TabItem from "../tabs/components/TabItem";
 import SavedTabsData from "../tabs/components/SavedTabsData";
 import Navbar from "../tabs/components/Navbar";
-
+import { AiOutlineArrowRight } from 'react-icons/ai';
+import { ToastContainer } from "react-toastify";
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 const Popup = () => {
     const [tabData, setTabData] = useState([]);
     // current folder
@@ -81,6 +84,35 @@ const Popup = () => {
             });
 
         });
+        chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+            if (message.action === 'sendDataToPopup') {
+                console.log('Received Data in Popup w:', message.data);
+                const receivedData = message.data;
+                if (receivedData.tabs.length === 0) {
+                    toast(" folder is empty")
+                }
+                if (receivedData.tabs) {
+                    console.log('Received Data in Popup:', receivedData.tabs);
+                    setshowSavedTabsData(receivedData.tabs)
+                }
+                else {
+                    console.log('Received Data in Popup empty:', receivedData);
+                }
+            }
+        });
+        chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+            if (message.action === 'deletedSuccessFully') {
+                const receivedData = message.data;
+                if (receivedData.tabs) {
+                    toast.success('Tab deleted successfully');
+                    console.log('Received Data in saved tabs:', receivedData.tabs);
+                }
+                else {
+                    console.log('Received Data in saved tabs', receivedData);
+                }
+            }
+        });
+
     }, [setTabData]);
     const closeTab = (tabId) => {
         chrome.tabs.remove(tabId);
@@ -100,19 +132,6 @@ const Popup = () => {
             }
         });
     };
-    // In your React component in the popup script
-    chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-        if (message.action === 'sendDataToPopup') {
-            const receivedData = message.data;
-            if (receivedData.tabs) {
-                console.log('Received Data in Popup:', receivedData.tabs);
-                setshowSavedTabsData(receivedData.tabs)
-            }
-            else {
-                console.log('Received Data in Popup:', receivedData);
-            }
-        }
-    });
 
     const getFaviconUrl = async (url) => {
         try {
@@ -157,13 +176,13 @@ const Popup = () => {
                 <div className="container">
                     <div className="leftbar">
                         <div
-                            className={`folder l ${selectedFolder === 3 ? "selected" : ""} active:scale-95 active:bg-purple-600 gap-4`}
+                            className={`folder l ${selectedFolder === 3 ? "selected" : ""}  hover:shadow-inner active:scale-95 active:bg-purple-600 gap-4`}
                             onClick={() => handleIsCurrentTabClick(true)}
                         >
                             Current Tabs
                         </div>
                         <div
-                            className={`folder ${selectedFolder === 0 ? "selected" : ""} active:scale-95 active:bg-purple-600 gap-4`}
+                            className={`folder ${selectedFolder === 0 ? "selected" : ""} active:scale-95  hover:shadow-inner active:bg-purple-600 gap-2`}
                             onClick={() => handleFolderClick(0)}
                         >
                             <p>Work</p>
@@ -176,11 +195,11 @@ const Popup = () => {
                                 className="active:text-blue-500 hover:text-blue-200"
                                 title="Show saved tabs of Work folder"
                             >
-                                Show
+                                <AiOutlineArrowRight />
                             </button>
                         </div>
                         <div
-                            className={`folder ${selectedFolder === 1 ? "selected" : ""} active:scale-95 active:bg-purple-600 gap-4`}
+                            className={`folder ${selectedFolder === 1 ? "selected" : ""} hover:shadow-inner active:scale-95 active:bg-purple-600 gap-2`}
                             onClick={() => handleFolderClick(1)}
                         >
                             <p>Music</p>
@@ -193,12 +212,12 @@ const Popup = () => {
                                 className="active:text-blue-500 hover:text-blue-200"
                                 title="Show saved tabs of music folder"
                             >
-                                Show
+                                <AiOutlineArrowRight />
                             </button>
                         </div>
 
                         <div
-                            className={`folder ${selectedFolder === 2 ? "selected" : ""} active:scale-95 active:bg-purple-600 gap-4`}
+                            className={`folder ${selectedFolder === 2 ? "selected" : ""} hover:shadow-inner active:scale-95 active:bg-purple-600 gap-2`}
                             onClick={() => handleFolderClick(2)}
                         >
                             Miscellaneous
@@ -211,7 +230,7 @@ const Popup = () => {
                                 className="active:text-blue-500 hover:text-blue-200"
                                 title="Show saved tabs of miscellaneous folder"
                             >
-                                Show
+                                <AiOutlineArrowRight />
                             </button>
                         </div>
 
@@ -245,6 +264,7 @@ const Popup = () => {
                                         <SavedTabsData
                                             key={tab.tabId}
                                             tab={tab}
+
                                             getFaviconUrl={getFaviconUrl}
                                             currentFolder={currentFolder}
                                         />
@@ -257,6 +277,18 @@ const Popup = () => {
                 </div>
                 <button onClick={fetchDataFromStorage}>Fetch Data from Chrome Storage</button>
             </main>
+            <ToastContainer
+                position="bottom-center"
+                autoClose={2000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="dark"
+            />
         </div>
 
     );

@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react'
 import { BsArrowUpRight } from 'react-icons/bs'
 import { MdDelete } from 'react-icons/md'
+import { toast } from 'react-toastify'
 const SavedTabsData = ({ tab, getFaviconUrl, currentFolder }) => {
     const [faviconUrl, setFaviconUrl] = useState(null);
-    function deleteTabFromBackend(tabId, tabUrl, tabTitle, currentFolder) {
-        console.log(tabId, tabUrl, tabTitle)
-        chrome.runtime.sendMessage({ action: 'deleteTabFromBackend', tabId, tabUrl, tabTitle, currentFolder });
+    function deleteTabFromBackend(tab, tabUrl, tabTitle, currentFolder) {
+        console.log(tab.tabId, tab.tabId, tabUrl, tabTitle, currentFolder)
+        let tabID = tab.tabId
+        chrome.runtime.sendMessage({ action: 'deleteTabFromBackend', tabID, currentFolder });
+        toast.success("Tab deleted successfully")
     }
     useEffect(() => {
         // Fetch and set the favicon URL when the component mounts
@@ -25,8 +28,10 @@ const SavedTabsData = ({ tab, getFaviconUrl, currentFolder }) => {
         }
     }
     const mainSiteName = getMainSiteName(tab.url);
+
+
     return (
-        <li className="relative tab-item">
+        <li className="relative tab-item hover:bg-[#F5F5F5] rounded-xl dark:hover:bg-gray-400">
             <div className="tab-content">
                 <img
                     className="w-8 h-8 rounded-md "
@@ -42,7 +47,7 @@ const SavedTabsData = ({ tab, getFaviconUrl, currentFolder }) => {
                 </span>
                 <div className="absolute top-4 right-2">
                     <div className="flex items-center space-x-4">
-                        <BsArrowUpRight className="w-6 h-6 rounded-md cursor-pointer active:text-emerald-300 hover:text-gray-600"
+                        <BsArrowUpRight className="w-6 h-6 transition-all ease-in-out delay-150 rounded-md cursor-pointer active:text-emerald-300 hover:text-gray-600"
                             title='Open in new tab'
                             onClick={
                                 () => {
@@ -50,11 +55,11 @@ const SavedTabsData = ({ tab, getFaviconUrl, currentFolder }) => {
                                 }
                             }
                         />
-                        <MdDelete className="w-6 h-6 rounded-md cursor-pointer active:text-red-300 hover:text-red-600"
+                        <MdDelete className="w-6 h-6 transition-all ease-in-out delay-150 rounded-md cursor-pointer active:text-red-300 hover:text-red-600"
                             title='Delete'
                             onClick={
                                 () => {
-                                    deleteTabFromBackend(tab.id, tab.url, tab.title, currentFolder);
+                                    deleteTabFromBackend(tab, tab.url, tab.title, currentFolder);
                                 }
                             }
                         />

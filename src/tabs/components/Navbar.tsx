@@ -4,6 +4,7 @@ import logoIcon from '../../assets/logoIcon.svg';
 import { useEffect, useState } from 'react';
 import { BsFillMoonStarsFill, BsSun } from 'react-icons/bs';
 import Modal from './Modal'; // Import your modal component
+import { toast } from 'react-toastify';
 
 const Navbar = () => {
     const [theme, setTheme] = useState(null)
@@ -12,7 +13,6 @@ const Navbar = () => {
     const [tabData, setTabData] = useState([]);
 
     useEffect(() => {
-
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
             setTheme('light')
         } else {
@@ -31,7 +31,7 @@ const Navbar = () => {
                 setlimit(result.limit)
                 if (tabs.length > result.limit) {
                     console.log("limit reached", tabs.length, result.limit)
-                    alert(`Limit reached ${tabs.length} tabs are open. Please close some tabs. `);
+                    alert(`Limit reached ${tabs.length} tabs are open the limit is ${result.limit}. Please close some tabs. `);
                 }
                 else {
                     console.log("limit not reached", tabs.length, result.limit)
@@ -57,9 +57,12 @@ const Navbar = () => {
     const handleTheme = () => {
         if (theme === 'light') {
             setTheme('dark')
+            toast.success("Dark theme enabled")
             window.localStorage.setItem('theme', 'dark')
         } else {
             setTheme('light')
+            toast.success("Light theme enabled")
+
             window.localStorage.setItem('theme', 'light')
         }
     }
@@ -92,7 +95,7 @@ const Navbar = () => {
                 />
                 <h1 className="text-xl font-bold ">TabStacker</h1>
             </div>
-            <div className='space-x-4'>
+            <div className='flex items-center space-x-4'>
                 <button
                     onClick={
                         () => {
@@ -100,7 +103,7 @@ const Navbar = () => {
                         }
                     }
                     title="Open modal to set limit."
-                    className=' font-extrabold hover:text-gray-600 active:text-amber-200'
+                    className='font-extrabold hover:text-gray-600 active:text-amber-200'
                 >Set Limit</button>
                 {isModalOpen && (
                     <Modal isOpen={isModalOpen} onClose={closeModal}>
@@ -125,11 +128,14 @@ const Navbar = () => {
 
                     theme === 'light' ? (
                         <>
-
-                            <BsFillMoonStarsFill className='text-lg' />
+                            <BsFillMoonStarsFill className='text-lg transition ease-in-out delay-150 hover:shadow-lg hover:text-yellow-500 hover:animate-pulse'
+                                title='Enable Dark Theme'
+                            />
                         </>
                     ) : (
-                        <BsSun className='text-lg' />
+                        <BsSun className='text-lg transition ease-in-out delay-150 hover:shadow-lg hover:text-yellow-500 hover:animate-pulse'
+                            title='Enable Light Theme'
+                        />
                     )
                 }</button>
             </div>

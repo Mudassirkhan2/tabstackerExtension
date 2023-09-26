@@ -4,6 +4,7 @@ import "../../popup/popup.css"
 import closeIcon from '../../assets/close-icon.svg';
 import { HiFolderPlus } from 'react-icons/hi2';
 import Modal from './Modal'; // Import your modal component
+import { toast } from 'react-toastify';
 const TabItem = (
     { tab, closeTab, activateTabByURL, getFaviconUrl, currentFolder,
         setArrayOfMainWebsites, arrayOfMainWebsites, faviconUrlarray
@@ -35,6 +36,8 @@ const TabItem = (
         console.log(tabId, tabUrl, tabTitle)
         chrome.runtime.sendMessage({ action: 'sendTabToBackend', tabId, tabUrl, tabTitle, currentFolder });
         console.log(arrayOfMainWebsites)
+        toast.success("Tab added successfully")
+
     }
 
     const openModal = (mainSiteName: string) => {
@@ -87,7 +90,7 @@ const TabItem = (
 
     const mainSiteName = getMainSiteName(tab.url);
     return (
-        <li className="relative tab-item">
+        <li className="relative tab-item hover:bg-[#F5F5F5] rounded-xl dark:hover:bg-gray-400">
             <div className="tab-content">
                 <img
                     className="w-8 h-8 rounded-md "
@@ -109,13 +112,13 @@ const TabItem = (
                 <div className="absolute top-4 right-2">
                     <div className="flex items-center space-x-4">
                         <img
-                            className="close-icon"
+                            className="transition-all ease-in-out delay-150 close-icon hover:scale-125"
                             src={closeIcon}
                             alt="Close"
                             onClick={() => closeTab(tab.id)}
                             title="Close tab"
                         />
-                        <HiFolderPlus className="w-6 h-6 rounded-md cursor-pointer active:text-emerald-300 hover:text-gray-600"
+                        <HiFolderPlus className="w-6 h-6 transition-all ease-in-out delay-150 rounded-md cursor-pointer active:text-emerald-300 hover:text-gray-600"
                             onClick={
                                 () => {
                                     sendTabToBackend(tab.id, tab.url, tab.title, currentFolder);
@@ -123,7 +126,7 @@ const TabItem = (
                             }
                             title="Add to folder"
                         />
-                        <BiTimer className="w-6 h-6 rounded-md cursor-pointer active:text-emerald-300 hover:text-gray-600"
+                        <BiTimer className="w-6 h-6 transition-all ease-in-out delay-150 rounded-md cursor-pointer hover:animate-bounce active:text-emerald-300 hover:text-gray-600"
                             onClick={
                                 () => {
                                     openModal(mainSiteName)
@@ -158,11 +161,10 @@ const TabItem = (
                                 </div>
                             </Modal>
                         )}
-
                     </div>
                 </div>
             </div>
-            <p className=" title">{tab.title}</p>
+            <p className="text-gray-700 title dark:text-slate-200 ">{tab.title}</p>
         </li>
     );
 };
