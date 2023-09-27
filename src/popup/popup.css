@@ -112,15 +112,7 @@ body {
   background: #007bff; /* Color of the thumb (a nice blue) */
 }
 
-/* Track when hovering */
-::-webkit-scrollbar-track:hover {
-  background: #71d076; /* Change background color on hover (green) */
-}
 
-/* Thumb when hovering */
-::-webkit-scrollbar-thumb:hover {
-  background: rgb(216, 170, 53); /* Change thumb color on hover (orange) */
-}
 
 /* Scrollbar corner (between vertical and horizontal scrollbar) */
 ::-webkit-scrollbar-corner {

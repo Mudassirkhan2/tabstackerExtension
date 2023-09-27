@@ -28,7 +28,11 @@ const SavedTabsData = ({ tab, getFaviconUrl, currentFolder }) => {
         }
     }
     const mainSiteName = getMainSiteName(tab.url);
-
+    // function to track the clicks /track-click/:userId/:folderId/:tabId
+    const trackClick = (tabId, currentFolder) => {
+        console.log("trackClick", tabId)
+        chrome.runtime.sendMessage({ action: 'trackClick', tabId, currentFolder });
+    }
 
     return (
         <li className="relative tab-item hover:bg-[#F5F5F5] rounded-xl dark:hover:bg-gray-400">
@@ -41,7 +45,9 @@ const SavedTabsData = ({ tab, getFaviconUrl, currentFolder }) => {
                 <span className="cursor-pointer tab-info" onClick={
                     () => {
                         chrome.tabs.create({ url: tab.url });
+                        trackClick(tab.tabId, currentFolder)
                     }
+
                 }>
                     {mainSiteName || tab.url}
                 </span>
@@ -52,6 +58,7 @@ const SavedTabsData = ({ tab, getFaviconUrl, currentFolder }) => {
                             onClick={
                                 () => {
                                     chrome.tabs.create({ url: tab.url });
+                                    trackClick(tab.tabId, currentFolder)
                                 }
                             }
                         />

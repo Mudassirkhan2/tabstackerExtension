@@ -87,6 +87,9 @@ const Popup = () => {
         chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             if (message.action === 'sendDataToPopup') {
                 console.log('Received Data in Popup w:', message.data);
+                if (message.data.error) {
+                    toast.error(message.data.error)
+                }
                 const receivedData = message.data;
                 if (receivedData.tabs.length === 0) {
                     toast(" folder is empty")

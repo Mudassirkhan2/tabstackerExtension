@@ -29,7 +29,9 @@
   },
   "dependencies": {
     "autoprefixer": "^10.4.7",
+    "chart.js": "^4.0.0",
     "postcss": "^8.4.14",
+    "react-chartjs-2": "^5.0.0",
     "react-icons": "^4.11.0",
     "react-router-dom": "6.2",
     "react-toastify": "^9.1.3",

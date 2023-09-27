@@ -77,8 +77,8 @@ const Navbar = () => {
         console.log(limit)
         chrome.storage.sync.set({ limit: limit }, function () {
             console.log('Value is set to ' + limit);
+            toast.success(`Tabs Limit set to ${limit}`)
         })
-
 
     }
     const handleLimitChange = (event) => {
