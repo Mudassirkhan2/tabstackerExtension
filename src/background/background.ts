@@ -65,7 +65,6 @@ function makeAPICall(token) {
 
 // Listen for messages from the popup or content scripts to send tab data to the backend
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    console.log("action fired in background", message.action, userId)
     if (message.action === 'sendTabToBackend') {
         if (!userId) {
             makeAPICall(tokenFirst);
@@ -275,7 +274,7 @@ chrome.tabs.query({}, (tabs) => {
 
 
 
-// Listen for messages from the popup or content scripts to show delete tabs
+// Listen for messages from the popup or content scripts to show trackClick tabs
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === 'trackClick') {
         console.log("trackClick running in background")
@@ -313,6 +312,52 @@ async function trackClick(tabId, currentFolder) {
     // Send a GET request to your backend
     return fetch(backendEndpoint, {
         method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            "Authorization": `Bearer ${token.token}`, // Include the token in the Authorization header
+        },
+    })
+        .then((response) => response.json())
+        .catch((error) => {
+            throw error;
+        });
+}
+
+// Listen for messages from the popup or content scripts to show getClickAnalytics of tabs
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    console.log("message", message)
+    if (message.action === 'getClickAnalytics') {
+        console.log("getClickAnalytics running in background")
+        if (!userId) {
+            makeAPICall(tokenFirst);
+        }
+        getClickAnalytics()
+            .then((response) => {
+                console.log("response from background", response);
+                chrome.runtime.sendMessage({ action: 'sendDataofAnalytics', data: response });
+                if (response.success) {
+                    sendResponse({ success: true });
+                } else {
+                    sendResponse({ success: false, error: 'Failed to send tab data to the backend.' });
+                }
+            })
+            .catch((error) => {
+                console.error('Error sending tab data to the backend:', error);
+                sendResponse({ success: false, error: 'Error sending tab data to the backend.' });
+            });
+        // Return true to indicate that you will send a response asynchronously
+        return true;
+    }
+});
+// Function to send a GET request to the backend to retrieve delete tabs
+async function getClickAnalytics() {
+    // https://tabstacker-backend.onrender.com/usertabs/tabsclick/64fc64751abeaef4f86236ff
+    const backendEndpoint = `${baseUrl}/usertabs/tabsclick/${userId}`;
+    const token = await chrome.storage.local.get(["token"]);
+    console.log(userId)
+    // Send a GET request to your backend
+    return fetch(backendEndpoint, {
+        method: 'GET',
         headers: {
             'Content-Type': 'application/json',
             "Authorization": `Bearer ${token.token}`, // Include the token in the Authorization header

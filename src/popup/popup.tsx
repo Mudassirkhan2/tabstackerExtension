@@ -173,7 +173,7 @@ const Popup = () => {
 
 
     return (
-        <div className="min-h-screen  dark:text-white dark:bg-black dark:bg-gradient-to-tr from-black via-transparent to-gray-700">
+        <div className="min-h-screen dark:text-white dark:bg-black dark:bg-gradient-to-tr from-black via-transparent to-gray-700">
             <main className="dark:text-white max-w-[1400px] mx-auto ">
                 <Navbar />
                 <div className="container">

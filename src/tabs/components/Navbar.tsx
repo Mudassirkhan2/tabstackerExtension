@@ -3,14 +3,19 @@ import settingsIcon from '../../assets/settings-icon.svg';
 import logoIcon from '../../assets/logoIcon.svg';
 import { useEffect, useState } from 'react';
 import { BsFillMoonStarsFill, BsSun } from 'react-icons/bs';
-import Modal from './Modal'; // Import your modal component
+import Modal from './Modal';
+import AnalyticsModal from "./AnalyticsModal"
 import { toast } from 'react-toastify';
-
+import BarChart from "./BarChart"
 const Navbar = () => {
     const [theme, setTheme] = useState(null)
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [limit, setlimit] = useState(15);
     const [tabData, setTabData] = useState([]);
+    // modal for analytics
+    const [isAnalyticsModalOpen, setIsAnalyticsModalOpen] = useState(false);
+    // analytics data
+    const [analyticsData, setAnalyticsData] = useState([]);
 
     useEffect(() => {
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
@@ -20,6 +25,7 @@ const Navbar = () => {
         }
         const localTheme = window.localStorage.getItem('theme')
         localTheme && setTheme(localTheme)
+
     }, [])
 
     useEffect(() => {
@@ -41,6 +47,16 @@ const Navbar = () => {
             const filteredTabs = tabs.filter((tab) => tab.url !== 'chrome://newtab/');
             // Set the filtered tabs in the tabData state
             setTabData(filteredTabs || []);
+            chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+                if (message.action === 'sendDataofAnalytics') {
+                    console.log('Received Data in navbar ', message.data);
+                    setAnalyticsData(message.data)
+
+                    if (message.data.error) {
+                        toast.error(message.data.error)
+                    }
+                }
+            });
         });
     }, [setTabData]);
     useEffect(() => {
@@ -69,8 +85,18 @@ const Navbar = () => {
     const openModal = () => {
         setIsModalOpen(true);
     };
+    function getClickAnalytics() {
+        console.log("open modal analytics")
+        chrome.runtime.sendMessage({ action: 'getClickAnalytics', data: tabData });
+    }
+    const openModalAnalytics = () => {
+        setIsAnalyticsModalOpen(true);
+    };
     const closeModal = () => {
         setIsModalOpen(false);
+    };
+    const closeModalAnalytics = () => {
+        setIsAnalyticsModalOpen(false);
     };
     const handleModalSubmit = () => {
         setIsModalOpen(false);
@@ -86,6 +112,7 @@ const Navbar = () => {
     };
     return (
         <nav className='flex items-center justify-between p-4 border-b-2 '>
+
             <div className='flex items-center space-x-2'>
                 <img
                     className="rounded-md w-9 h-9"
@@ -96,6 +123,24 @@ const Navbar = () => {
                 <h1 className="text-xl font-bold ">TabStacker</h1>
             </div>
             <div className='flex items-center space-x-4 '>
+                <button
+                    onClick={
+                        () => {
+                            getClickAnalytics()
+                            openModalAnalytics()
+                        }
+                    }
+                    title="Open Analytics modal"
+                    className='font-extrabold hover:text-gray-600 active:text-amber-200'
+                >Analytics</button>
+                {isAnalyticsModalOpen && (
+                    <AnalyticsModal isOpen={isAnalyticsModalOpen} onClose={closeModalAnalytics}>
+                        {analyticsData.length > 0 && (
+                            <BarChart data={analyticsData} />
+                        )
+                        }
+                    </AnalyticsModal>
+                )}
                 <button
                     onClick={
                         () => {
