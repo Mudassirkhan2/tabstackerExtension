@@ -241,39 +241,221 @@ async function deleteTabs(tabID, currentFolder) {
 }
 
 // Listen for connections from content scripts and send data to them
-chrome.runtime.onConnect.addListener((port) => {
-    port.onMessage.addListener((message) => {
-        if (message.action === 'requestDataFromBackground') {
-            console.log('Received requestDataFromBackground message from content script');
+// chrome.runtime.onConnect.addListener((port) => {
+//     port.onMessage.addListener((message) => {
+//         if (message.action === 'requestDataFromBackground') {
+//             console.log('Received requestDataFromBackground message from content script');
 
-            // Fetch data from storage and all currently opened tabs
-            chrome.storage.sync.get(['arrayOfMainWebsites'], (result) => {
-                if (!chrome.runtime.lastError) {
-                    const arrayOfMainWebsites = result.arrayOfMainWebsites || [];
-                    console.log('Fetched arrayOfMainWebsites:', arrayOfMainWebsites);
+//             // Fetch data from storage and all currently opened tabs
+//             chrome.storage.sync.get(['arrayOfMainWebsites'], (result) => {
+//                 if (!chrome.runtime.lastError) {
+//                     const arrayOfMainWebsites = result.arrayOfMainWebsites || [];
+//                     console.log('Fetched arrayOfMainWebsites:', arrayOfMainWebsites);
 
-                    chrome.tabs.query({}, (tabs) => {
-                        console.log('Fetched all currently opened tabs:', tabs);
-                        // Send data to the content script
-                        port.postMessage({ arrayOfMainWebsites, tabs });
-                        console.log('Sent arrayOfMainWebsites and tabs to content script');
-                    });
-                } else {
-                    console.error('Error fetching data from storage:', chrome.runtime.lastError);
-                }
-            });
-        }
-    });
-});
+//                     chrome.tabs.query({}, (tabs) => {
+//                         console.log('Fetched all currently opened tabs:', tabs);
+//                         // Send data to the content script
+//                         port.postMessage({ arrayOfMainWebsites, tabs });
+//                         console.log('Sent arrayOfMainWebsites and tabs to content script');
+//                     });
+//                 } else {
+//                     console.error('Error fetching data from storage:', chrome.runtime.lastError);
+//                 }
+//             });
+//         }
+//     });
+// });
 
 // Establish a connection with content scripts and send a message to request data
-chrome.tabs.query({}, (tabs) => {
-    for (const tab of tabs) {
-        const port = chrome.tabs.connect(tab.id, { name: 'content-script' });
-        console.log('Established connection with content script in tab', tab.id);
+// chrome.tabs.query({}, (tabs) => {
+//     for (const tab of tabs) {
+//         const port = chrome.tabs.connect(tab.id, { name: 'content-script' });
+//         console.log('Established connection with content script in tab', tab.id);
 
-        port.postMessage({ action: 'requestDataFromBackground' });
-        console.log('Sent requestDataFromBackground message to content script in tab', tab.id);
+//         port.postMessage({ action: 'requestDataFromBackground' });
+//         console.log('Sent requestDataFromBackground message to content script in tab', tab.id);
+//     }
+// });
+
+
+// chrome.tabs.query({}, (tabs) => {
+//     console.log("tabs", tabs)
+//     const activeTab = tabs.filter((tab) => tab.active);
+//     console.log("activeTab", activeTab)
+//     // Fetch data from storage and all currently opened tabs
+//     chrome.storage.sync.get(['arrayOfMainWebsites'], (result) => {
+//         if (!chrome.runtime.lastError) {
+//             const arrayOfMainWebsites = result.arrayOfMainWebsites || [];
+//             console.log('Fetched arrayOfMainWebsites:', arrayOfMainWebsites);
+//             console.log('Active tab:', activeTab)
+//             const mainSiteName = getMainSiteName(activeTab[0].url);
+//             function getMainSiteName(url) {
+//                 try {
+//                     const urlObject = new URL(url);
+//                     return urlObject.hostname;
+//                 } catch (error) {
+//                     console.error(`Error extracting main site name from ${url}: ${error}`);
+//                     return url; // Return the original URL in case of an error
+//                 }
+//             }
+//             console.log(mainSiteName)
+//             const tabData = arrayOfMainWebsites.find((item) => item['mainWebsites'] === mainSiteName);
+//             console.log("tabdata is", tabData);
+//             console.log(tabData.mainWebsites === mainSiteName)
+//         } else {
+//             console.error('Error fetching data from storage:', chrome.runtime.lastError);
+//         }
+//     });
+
+// });
+
+
+// Define a function to fetch data from storage and all currently opened tabs
+let timerInterval;
+
+function fetchDataFromStorageAndTabs() {
+    chrome.storage.sync.get(['arrayOfMainWebsites'], (result) => {
+        if (!chrome.runtime.lastError) {
+            const arrayOfMainWebsites = result.arrayOfMainWebsites || [];
+            console.log('Fetched arrayOfMainWebsites:', arrayOfMainWebsites);
+        } else {
+            console.error('Error fetching data from storage:', chrome.runtime.lastError);
+        }
+    });
+}
+
+// Function to update data when the active tab changes
+function updateDataOnTabChange() {
+    chrome.tabs.onActivated.addListener((activeInfo) => {
+        chrome.storage.sync.get(['arrayOfMainWebsites'], (result) => {
+            if (!chrome.runtime.lastError) {
+                const arrayOfMainWebsites = result.arrayOfMainWebsites || [];
+                console.log('Fetched arrayOfMainWebsites:', arrayOfMainWebsites);
+
+                // Get the active tab's URL and main site name
+                chrome.tabs.query({}, (tabs) => {
+                    console.log('Fetched all currently opened tabs:', tabs);
+
+                    const activeTab = tabs.find((tab) => tab.id === activeInfo.tabId);
+                    if (activeTab) {
+                        const mainSiteName = getMainSiteName(activeTab.url);
+                        console.log('Active Tab URL:', activeTab.url);
+                        console.log('Main Site Name:', mainSiteName);
+
+                        // Find tabData based on mainSiteName
+                        const tabData = arrayOfMainWebsites.find((item) => item['mainWebsites'] === mainSiteName);
+                        console.log("tabData is", tabData);
+
+                        // Check if tabData.mainWebsites is equal to mainSiteName
+                        if (tabData && tabData.mainWebsites === mainSiteName) {
+                            console.log('tabData.mainWebsites is equal to mainSiteName');
+                            startTimer(tabData.time, tabData); // Start the timer with the specified time
+                        } else {
+                            console.log('tabData.mainWebsites is not equal to mainSiteName');
+                            stopTimer(); // Stop the timer if not on the specified site
+                        }
+                    }
+                });
+            } else {
+                console.error('Error fetching data from storage:', chrome.runtime.lastError);
+            }
+        });
+    });
+}
+
+function startTimer(time, tabData) {
+    clearInterval(timerInterval); // Clear any existing timer
+    const duration = parseFloat(time) * 60 * 1000; // Convert time to milliseconds
+    let remainingTime = duration;
+
+    timerInterval = setInterval(() => {
+        const minutes = Math.floor(remainingTime / 60000);
+        const seconds = ((remainingTime % 60000) / 1000).toFixed(0);
+
+        console.log(`Timer is running... ${minutes}:${seconds} remaining`);
+
+        // Update tabData.time with the remaining time in minutes
+        tabData.time = (remainingTime / 60000);
+        // Now, update the arrayOfMainWebsites in storage
+        chrome.storage.sync.get(['arrayOfMainWebsites'], (result) => {
+            if (!chrome.runtime.lastError) {
+                const arrayOfMainWebsites = result.arrayOfMainWebsites || [];
+                console.log('Fetched arrayOfMainWebsites:', arrayOfMainWebsites);
+                // Find the index of the tabData object within arrayOfMainWebsites
+                const index = arrayOfMainWebsites.findIndex((item) => item['mainWebsites'] === tabData.mainWebsites);
+
+                if (index !== -1) {
+                    // Update the tabData within arrayOfMainWebsites
+                    arrayOfMainWebsites[index] = tabData;
+
+                    // Update the storage with the modified arrayOfMainWebsites
+                    chrome.storage.sync.set({ 'arrayOfMainWebsites': arrayOfMainWebsites }, () => {
+                        if (!chrome.runtime.lastError) {
+                            console.log('arrayOfMainWebsites updated successfully in storage.');
+                        } else {
+                            console.error('Error updating arrayOfMainWebsites in storage:', chrome.runtime.lastError);
+                        }
+                    });
+                }
+            } else {
+                console.error('Error fetching data from storage:', chrome.runtime.lastError);
+            }
+        });
+
+        remainingTime -= 1000;
+
+        if (remainingTime < 0) {
+            clearInterval(timerInterval); // Clear the timer when time is up
+            console.log('Timer has finished.');
+            chrome.tabs.query({}, (tabs) => {
+                console.log('Fetched all tabs:', tabs);
+              
+                const activeTabs = tabs.filter((tab) => tab.active);
+                if (activeTabs.length > 0) {
+                  const activeTab = activeTabs[0];
+                  console.log("Active Tab:", activeTab);
+              
+                  if (remainingTime < 0) {
+                    clearInterval(timerInterval); // Clear the timer when time is up
+                    console.log('Timer has finished.');
+              
+                    chrome.tabs.sendMessage(activeTab.id, { tabDataTitle: tabData.title }, (response) => {
+                      if (chrome.runtime.lastError) {
+                        console.error('Error sending message to content script:', chrome.runtime.lastError);
+                      } else {
+                        console.log('Message sent to content script:', response);
+                      }
+                    });
+                  }
+                }
+              });
+        }
+    }, 1000);
+
+    console.log('Timer started.');
+}
+
+
+
+function stopTimer() {
+    clearInterval(timerInterval); // Clear the timer
+}
+
+function getMainSiteName(url) {
+    try {
+        const urlObject = new URL(url);
+        return urlObject.hostname;
+    } catch (error) {
+        console.error(`Error extracting main site name from ${url}: ${error}`);
+        return url; // Return the original URL in case of an error
+    }
+}
+
+// Call the function when the extension is installed or updated
+chrome.runtime.onInstalled.addListener((details) => {
+    if (details.reason === 'install' || details.reason === 'update') {
+        fetchDataFromStorageAndTabs();
+        updateDataOnTabChange(); // Start listening for tab changes
     }
 });
 
