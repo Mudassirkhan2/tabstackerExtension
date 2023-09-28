@@ -450,7 +450,8 @@ function getMainSiteName(url) {
         return url; // Return the original URL in case of an error
     }
 }
-
+fetchDataFromStorageAndTabs();
+updateDataOnTabChange();
 // Call the function when the extension is installed or updated
 chrome.runtime.onInstalled.addListener((details) => {
     if (details.reason === 'install' || details.reason === 'update') {

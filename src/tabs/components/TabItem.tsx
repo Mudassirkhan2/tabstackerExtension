@@ -128,7 +128,7 @@ const TabItem = (
                             }
                             title="Add to folder"
                         />
-                        <BiTimer className="w-6 h-6 transition-all ease-in-out delay-150 rounded-md cursor-pointer hover:animate-bounce active:text-emerald-300 hover:text-gray-600"
+                        <BiTimer className="w-6 h-6 transition-all ease-in-out delay-150 rounded-md cursor-pointer active:text-emerald-300 hover:text-gray-600"
                             onClick={
                                 () => {
                                     openModal(mainSiteName)

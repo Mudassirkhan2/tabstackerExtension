@@ -14,7 +14,20 @@ console.log("Content script loaded");
 // content_script.ts
 
 // content_script.js
-
+const popup = document.createElement('div');
+            popup.id = 'my-popup';
+            popup.style.position = 'fixed';
+            popup.style.top = '10px';
+            popup.style.left = '10px';
+            popup.style.zIndex = '9999';
+            popup.style.border = '1px solid #000';
+            popup.style.padding = '20px';
+            popup.style.backgroundColor = '#fff';
+            popup.style.color = '#000';
+            popup.style.borderRadius = '5px';
+            popup.style.boxShadow = '0 0 10px #000';
+            popup.style.display = 'none';
+            document.body.appendChild(popup);
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   // Check if the message contains the tabDataTitle property
   console.log("message ", message);
@@ -22,6 +35,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     const title = message.tabDataTitle;
 
     // Display an alert box with the received title
+          // SHOW A POPUP add it in the body of the html
+          popup.innerText = `Timer ended for  ${title} `;
+            popup.style.display = 'block';
+            setTimeout(() => {
+              popup.style.display = 'none';
+            }, 3000);    
     alert(`Received title: ${title}`);
 
     // You can perform any other actions you want with the received title here.
@@ -33,7 +52,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === 'someAction') {
       // Access the data sent in the message
       const messageData = message.data;
-      
+
+
       // Do something with the data
       console.log('Received message from background:', messageData);
 
