@@ -77,12 +77,14 @@ const TabItem = (
                 if (chrome.runtime.lastError) {
                     console.error(chrome.runtime.lastError);
                 } else {
+                    toast.success(`Timer set for ${title} for ${time} minutes`)
                     console.log('Data saved successfully:', dataToSave);
                     console.log('Array of main websites saved successfully:', updatedArray);
                 }
                 closeModal();
             });
         } else {
+            toast.error("Please enter both title and time")
             // Handle the case where either title or time is missing
             console.error('Both title and time must be provided to save data.');
         }
@@ -90,7 +92,7 @@ const TabItem = (
 
     const mainSiteName = getMainSiteName(tab.url);
     return (
-        <li className="relative tab-item hover:bg-[#F5F5F5] rounded-xl dark:hover:bg-gray-400">
+        <li className="relative tab-item hover:bg-[#dcdcdc] rounded-xl dark:hover:bg-gray-400">
             <div className="tab-content">
                 <img
                     className="w-8 h-8 rounded-md "
@@ -132,7 +134,7 @@ const TabItem = (
                                     openModal(mainSiteName)
                                 }
                             }
-                            title="Open modal to set timer."
+                            title="Set timer."
 
                         />
                         {isModalOpen && (
@@ -149,11 +151,12 @@ const TabItem = (
 
                                     <label htmlFor="time" className='dark:text-black'>Time (in mins):</label>
                                     <input
-                                        type="text"
+                                        type="number"
                                         id="time"
                                         value={time}
                                         onChange={handleTimeChange}
                                         className='dark:text-black'
+
                                     />
                                     <div id="modal-buttons-div">
                                         <button className="modal-button dark:text-gray-700" onClick={handleModalSubmit}>Submit</button>

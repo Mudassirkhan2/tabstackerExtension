@@ -27,6 +27,21 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     // You can perform any other actions you want with the received title here.
   }
 });
+// Listen for messages from the background script
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  // Check if the message has the expected action
+  if (message.action === 'someAction') {
+      // Access the data sent in the message
+      const messageData = message.data;
+      
+      // Do something with the data
+      console.log('Received message from background:', messageData);
+
+      // Optionally, you can send a response back to the background script
+      // sendResponse({ response: 'Message received successfully!' });
+  }
+});
+
 
 
 // Define a variable to store the timer intervals for each tab

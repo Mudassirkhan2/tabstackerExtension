@@ -404,26 +404,31 @@ function startTimer(time, tabData) {
             console.log('Timer has finished.');
             chrome.tabs.query({}, (tabs) => {
                 console.log('Fetched all tabs:', tabs);
-              
                 const activeTabs = tabs.filter((tab) => tab.active);
                 if (activeTabs.length > 0) {
-                  const activeTab = activeTabs[0];
-                  console.log("Active Tab:", activeTab);
-              
-                  if (remainingTime < 0) {
-                    clearInterval(timerInterval); // Clear the timer when time is up
-                    console.log('Timer has finished.');
-              
-                    chrome.tabs.sendMessage(activeTab.id, { tabDataTitle: tabData.title }, (response) => {
-                      if (chrome.runtime.lastError) {
-                        console.error('Error sending message to content script:', chrome.runtime.lastError);
-                      } else {
-                        console.log('Message sent to content script:', response);
-                      }
-                    });
-                  }
+                    const activeTab = activeTabs[0];
+                    console.log("Active Tab:", activeTab);
+                    if (remainingTime < 0) {
+                        clearInterval(timerInterval); // Clear the timer when time is up
+                        console.log('Timer has finished.');
+                        chrome.tabs.sendMessage(activeTab.id, { tabDataTitle: tabData.title }, (response) => {
+                            if (chrome.runtime.lastError) {
+                                console.error('Error sending message to content script:', chrome.runtime.lastError);
+                            } else {
+                                console.log('Message sent to content script:', response);
+                            }
+                        });
+                        // chrome.storage.sync.remove(['arrayOfMainWebsites'], () => {
+                        //     if (!chrome.runtime.lastError) {
+                        //         console.log('Removed arrayOfMainWebsites from storage.');
+                        //     } else {
+                        //         console.error('Error removing arrayOfMainWebsites from storage:', chrome.runtime.lastError);
+                        //     }
+                        // console.log(arrayOfMainWebsites)
+                        // });
+                    }
                 }
-              });
+            });
         }
     }, 1000);
 

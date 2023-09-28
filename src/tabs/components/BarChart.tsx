@@ -5,7 +5,6 @@ import { CategoryScale, Chart, LinearScale, BarElement, Tooltip, Legend } from "
 
 Chart.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 const BarChart = ({ data }) => {
-    console.log(data)
     function getMainSiteName(url) {
         try {
             const urlObject = new URL(url);

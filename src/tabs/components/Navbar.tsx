@@ -30,17 +30,11 @@ const Navbar = () => {
 
     useEffect(() => {
         chrome.tabs.query({}, (tabs) => {
-            console.log("tabs from Navbar", tabs)
             // get limit from storage
             chrome.storage.sync.get(['limit'], function (result) {
-                console.log('Value currently is ' + result.limit);
                 setlimit(result.limit)
                 if (tabs.length > result.limit) {
-                    console.log("limit reached", tabs.length, result.limit)
                     toast.info(`Limit reached ${tabs.length} tabs are open the limit is ${result.limit}. Please close some tabs. `)
-                }
-                else {
-                    console.log("limit not reached", tabs.length, result.limit)
                 }
             });
             // Filter out tabs with URL "chrome://newtab/"
@@ -49,7 +43,6 @@ const Navbar = () => {
             setTabData(filteredTabs || []);
             chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                 if (message.action === 'sendDataofAnalytics') {
-                    console.log('Received Data in navbar ', message.data);
                     setAnalyticsData(message.data)
 
                     if (message.data.error) {
@@ -78,7 +71,6 @@ const Navbar = () => {
         } else {
             setTheme('light')
             toast.success("Light theme enabled")
-
             window.localStorage.setItem('theme', 'light')
         }
     }
@@ -86,7 +78,6 @@ const Navbar = () => {
         setIsModalOpen(true);
     };
     function getClickAnalytics() {
-        console.log("open modal analytics")
         chrome.runtime.sendMessage({ action: 'getClickAnalytics', data: tabData });
     }
     const openModalAnalytics = () => {
@@ -100,12 +91,9 @@ const Navbar = () => {
     };
     const handleModalSubmit = () => {
         setIsModalOpen(false);
-        console.log(limit)
         chrome.storage.sync.set({ limit: limit }, function () {
-            console.log('Value is set to ' + limit);
             toast.success(`Tabs Limit set to ${limit}`)
         })
-
     }
     const handleLimitChange = (event) => {
         setlimit(event.target.value);
@@ -135,10 +123,13 @@ const Navbar = () => {
                 >Analytics</button>
                 {isAnalyticsModalOpen && (
                     <AnalyticsModal isOpen={isAnalyticsModalOpen} onClose={closeModalAnalytics}>
-                        {analyticsData.length > 0 && (
+                        {analyticsData.length > 0 ? (
                             <BarChart data={analyticsData} />
-                        )
-                        }
+                        ) : (
+                            <div className='w-[200px] h-[200px] flex items-center justify-center'>
+                                <p>Loading...</p>
+                            </div>
+                        )}
                     </AnalyticsModal>
                 )}
                 <button
