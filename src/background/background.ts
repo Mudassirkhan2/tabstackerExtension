@@ -1,7 +1,7 @@
 // Listen for the onInstalled event and open a new tab with the login page URL if the extension was just installed
 chrome.runtime.onInstalled.addListener(function (details) {
     if (details.reason === 'install') {
-        chrome.tabs.create({ url: 'https://tabstacker.vercel.app/' });
+        chrome.windows.create({ url: 'https://tabstacker.vercel.app/', type: 'normal' });
     }
 });
 
@@ -411,21 +411,43 @@ function startTimer(time, tabData) {
                     if (remainingTime < 0) {
                         clearInterval(timerInterval); // Clear the timer when time is up
                         console.log('Timer has finished.');
-                        chrome.tabs.sendMessage(activeTab.id, { tabDataTitle: tabData.title }, (response) => {
+                        console.log("holabola")
+                        const tabdatatitle=tabData.title
+                                chrome.storage.sync.get(['arrayOfMainWebsites'], (result) => {
+                                    if (!chrome.runtime.lastError) {
+                                        const arrayOfMainWebsites = result.arrayOfMainWebsites || [];
+                                        console.log('Fetched arrayOfMainWebsites:', arrayOfMainWebsites);
+
+                                        // Find the index of tabData in arrayOfMainWebsites
+                                        const index = arrayOfMainWebsites.findIndex((item) => item['mainWebsites'] === tabData.mainWebsites);
+                                        console.log("index", index) 
+
+                                        if (index !== -1) {
+                                            // Remove tabData from arrayOfMainWebsites
+                                            arrayOfMainWebsites.splice(index, 1);
+
+                                            // Update the storage with the modified arrayOfMainWebsites
+                                            chrome.storage.sync.set({ 'arrayOfMainWebsites': arrayOfMainWebsites }, () => {
+                                                if (!chrome.runtime.lastError) {
+                                                    console.log('tabData removed from arrayOfMainWebsites and updated in storage.', arrayOfMainWebsites);
+                                                } else {
+                                                    console.error('Error updating arrayOfMainWebsites in storage:', chrome.runtime.lastError);
+                                                }
+                                            });
+                                        }
+                                    } else {
+                                        console.error('Error fetching data from storage:', chrome.runtime.lastError);
+                                    }
+                                });
+                        chrome.tabs.sendMessage(activeTab.id, { tabDataTitle: tabdatatitle}, (response) => {
                             if (chrome.runtime.lastError) {
                                 console.error('Error sending message to content script:', chrome.runtime.lastError);
                             } else {
                                 console.log('Message sent to content script:', response);
+
+                                // Remove the current instance of tabData from 
                             }
                         });
-                        // chrome.storage.sync.remove(['arrayOfMainWebsites'], () => {
-                        //     if (!chrome.runtime.lastError) {
-                        //         console.log('Removed arrayOfMainWebsites from storage.');
-                        //     } else {
-                        //         console.error('Error removing arrayOfMainWebsites from storage:', chrome.runtime.lastError);
-                        //     }
-                        // console.log(arrayOfMainWebsites)
-                        // });
                     }
                 }
             });
@@ -453,12 +475,12 @@ function getMainSiteName(url) {
 fetchDataFromStorageAndTabs();
 updateDataOnTabChange();
 // Call the function when the extension is installed or updated
-chrome.runtime.onInstalled.addListener((details) => {
-    if (details.reason === 'install' || details.reason === 'update') {
-        fetchDataFromStorageAndTabs();
-        updateDataOnTabChange(); // Start listening for tab changes
-    }
-});
+// chrome.runtime.onInstalled.addListener((details) => {
+//     if (details.reason === 'install' || details.reason === 'update') {
+//         fetchDataFromStorageAndTabs();
+//         updateDataOnTabChange(); // Start listening for tab changes
+//     }
+// });
 
 
 
