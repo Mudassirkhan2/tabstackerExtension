@@ -578,6 +578,51 @@ async function getClickAnalytics() {
             throw error;
         });
 }
+// Listen for messages from the popup or content scripts to show getPieChartAnalytics of tabs
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    console.log("message", message)
+    if (message.action === 'getPieChartAnalytics') {
+        console.log("getPieChartAnalytics running in background")
+        if (!userId) {
+            makeAPICall(tokenFirst);
+        }
+        getPieChartAnalytics()
+            .then((response) => {
+                console.log("response from background", response);
+                chrome.runtime.sendMessage({ action: 'getPieChartAnalytics', data: response });
+                if (response.success) {
+                    sendResponse({ success: true });
+                } else {
+                    sendResponse({ success: false, error: 'Failed to send tab data to the backend.' });
+                }
+            })
+            .catch((error) => {
+                console.error('Error sending tab data to the backend:', error);
+                sendResponse({ success: false, error: 'Error sending tab data to the backend.' });
+            });
+        // Return true to indicate that you will send a response asynchronously
+        return true;
+    }
+});
+// Function to send a GET request to the backend to retrieve delete tabs
+async function getPieChartAnalytics() {
+    // https://tabstacker-backend.onrender.com/usertabs/tabsclick/64fc64751abeaef4f86236ff
+    const backendEndpoint = `${baseUrl}/usertabs/time-spent/${userId}`;
+    const token = await chrome.storage.local.get(["token"]);
+    console.log(userId)
+    // Send a GET request to your backend
+    return fetch(backendEndpoint, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            "Authorization": `Bearer ${token.token}`, // Include the token in the Authorization header
+        },
+    })
+        .then((response) => response.json())
+        .catch((error) => {
+            throw error;
+        });
+}
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === 'permissiongranted') {
@@ -667,10 +712,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                     console.log('Tab activated:', activeInfo);
                     chrome.tabs.get(activeInfo.tabId, (tab) => {
                         const tabTitle = tab.title;
-                        console.log("Bhola mere",userDataArray, tabTitle)
+                        console.log("Bhola mere", userDataArray, tabTitle)
                         const userTab = userDataArray.find(userTab => userTab.tabTitle === tabTitle);
                         if (userTab) {
-                            if (tabTitle !== currentTabTitle && currentTabTitle!==null) {
+                            if (tabTitle !== currentTabTitle && currentTabTitle !== null) {
                                 // Stop the timer and send data
                                 stopTimer(seconds, minutes);
                             }

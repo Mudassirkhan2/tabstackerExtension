@@ -7,6 +7,7 @@ import Modal from './Modal';
 import AnalyticsModal from "./AnalyticsModal"
 import { toast } from 'react-toastify';
 import BarChart from "./BarChart"
+import PieChart from './PieChart';
 const Navbar = () => {
     const [theme, setTheme] = useState(null)
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -14,8 +15,12 @@ const Navbar = () => {
     const [tabData, setTabData] = useState([]);
     // modal for analytics
     const [isAnalyticsModalOpen, setIsAnalyticsModalOpen] = useState(false);
+    // modal for a pie chartData
+    const [isPieChartModalOpen, setIsPieChartModalOpen] = useState(false);
     // analytics data
     const [analyticsData, setAnalyticsData] = useState([]);
+    // pie chartData
+    const [pieChartData, setPieChartData] = useState([]);
     const [timepermission, setTimepermission] = useState(null);
     useEffect(() => {
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
@@ -36,7 +41,7 @@ const Navbar = () => {
         //     chrome.runtime.sendMessage({ action: 'permissiongranted' });
         // }        
     }, [])
-console.log(timepermission)
+    console.log(timepermission)
     useEffect(() => {
         chrome.tabs.query({}, (tabs) => {
             // get limit from storage
@@ -53,14 +58,22 @@ console.log(timepermission)
             chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                 if (message.action === 'sendDataofAnalytics') {
                     setAnalyticsData(message.data)
-
+                    if (message.data.error) {
+                        toast.error(message.data.error)
+                    }
+                }
+            });
+            chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+                if (message.action === 'getPieChartAnalytics') {
+                    console.log("pie chart data", message.data)
+                    setPieChartData(message.data)
                     if (message.data.error) {
                         toast.error(message.data.error)
                     }
                 }
             });
         });
-    }, [setTabData]);
+    }, [setTabData, setPieChartData]);
     useEffect(() => {
         if (theme === 'light') {
             document.documentElement.classList.remove('dark')
@@ -89,14 +102,23 @@ console.log(timepermission)
     function getClickAnalytics() {
         chrome.runtime.sendMessage({ action: 'getClickAnalytics', data: tabData });
     }
+    function getPieChartAnalytics() {
+        chrome.runtime.sendMessage({ action: 'getPieChartAnalytics', data: tabData });
+    }
     const openModalAnalytics = () => {
         setIsAnalyticsModalOpen(true);
+    };
+    const openPieChartModalAnalytics = () => {
+        setIsPieChartModalOpen(true);
     };
     const closeModal = () => {
         setIsModalOpen(false);
     };
     const closeModalAnalytics = () => {
         setIsAnalyticsModalOpen(false);
+    };
+    const closePieChartModalAnalytics = () => {
+        setIsPieChartModalOpen(false);
     };
     const handleModalSubmit = () => {
         setIsModalOpen(false);
@@ -107,7 +129,7 @@ console.log(timepermission)
     const handleLimitChange = (event) => {
         setlimit(event.target.value);
     };
-    const sendpermissionmessage = (timepermission) => { 
+    const sendpermissionmessage = (timepermission) => {
 
         if (timepermission) {
             chrome.runtime.sendMessage({ action: 'permissiongranted' });
@@ -127,8 +149,18 @@ console.log(timepermission)
                 />
                 <h1 className="text-xl font-bold ">TabStacker</h1>
             </div>
-            
+
             <div className='flex items-center space-x-4 '>
+                <button
+                    onClick={
+                        () => {
+                            getPieChartAnalytics()
+                            openPieChartModalAnalytics()
+                        }
+                    }
+                    title="Open Analytics modal"
+                    className='font-extrabold hover:text-gray-600 active:text-amber-200'
+                >Pie Analytics</button>
                 <button
                     onClick={
                         () => {
@@ -139,20 +171,32 @@ console.log(timepermission)
                     title="Open Analytics modal"
                     className='font-extrabold hover:text-gray-600 active:text-amber-200'
                 >Analytics</button>
-                    <button
+                {isPieChartModalOpen && (
+                    <AnalyticsModal isOpen={isPieChartModalOpen} onClose={closePieChartModalAnalytics}>
+                        {pieChartData.length > 0 ? (
+                            <PieChart data={pieChartData} />
+                        ) : (
+                            <div className='w-[200px] h-[200px] flex items-center justify-center'>
+                                <p>Loading...</p>
+                            </div>
+                        )}
+                    </AnalyticsModal>
+                )}
+                <button
                     onClick={
                         () => {
                             setTimepermission(!timepermission)
                             // set the timepermission in storage
                             chrome.storage.sync.set({ timepermission: timepermission }, function () {
                                 console.log('Value is set to ' + timepermission);
-                            });  
-                            sendpermissionmessage(timepermission)  
+                            });
+                            sendpermissionmessage(timepermission)
                         }
                     }
                     title="Open Pie Chart"
                     className='font-extrabold hover:text-gray-600 active:text-amber-200'
                 >Pie Chart</button>
+
                 {isAnalyticsModalOpen && (
                     <AnalyticsModal isOpen={isAnalyticsModalOpen} onClose={closeModalAnalytics}>
                         {analyticsData.length > 0 ? (
@@ -207,14 +251,7 @@ console.log(timepermission)
                     )
                 }</button>
             </div>
-            {/* <button>
-                <img
-                    className="w-6 h-6 rounded-md cursor-pointer"
-                    src={settingsIcon}
-                    alt="settings"
-                    title="settings"
-                />
-            </button> */}
+
         </nav>
     )
 }
