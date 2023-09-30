@@ -16,7 +16,7 @@ const Navbar = () => {
     const [isAnalyticsModalOpen, setIsAnalyticsModalOpen] = useState(false);
     // analytics data
     const [analyticsData, setAnalyticsData] = useState([]);
-
+    const [timepermission, setTimepermission] = useState(null);
     useEffect(() => {
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
             setTheme('light')
@@ -26,8 +26,17 @@ const Navbar = () => {
         const localTheme = window.localStorage.getItem('theme')
         localTheme && setTheme(localTheme)
 
-    }, [])
+        //get timepermission from storage
+        // chrome.storage.sync.get(['timepermission'], function (result) {
+        //     setTimepermission(result.timepermission)
+        // });
 
+        // //send chrome message if the condition is true that "permission granted"
+        // if (timepermission) {
+        //     chrome.runtime.sendMessage({ action: 'permissiongranted' });
+        // }        
+    }, [])
+console.log(timepermission)
     useEffect(() => {
         chrome.tabs.query({}, (tabs) => {
             // get limit from storage
@@ -98,6 +107,14 @@ const Navbar = () => {
     const handleLimitChange = (event) => {
         setlimit(event.target.value);
     };
+    const sendpermissionmessage = (timepermission) => { 
+
+        if (timepermission) {
+            chrome.runtime.sendMessage({ action: 'permissiongranted' });
+        } else {
+            chrome.runtime.sendMessage({ action: 'permissiondenied' });
+        }
+    };
     return (
         <nav className='flex items-center justify-between p-4 border-b-2 '>
 
@@ -110,6 +127,7 @@ const Navbar = () => {
                 />
                 <h1 className="text-xl font-bold ">TabStacker</h1>
             </div>
+            
             <div className='flex items-center space-x-4 '>
                 <button
                     onClick={
@@ -121,6 +139,20 @@ const Navbar = () => {
                     title="Open Analytics modal"
                     className='font-extrabold hover:text-gray-600 active:text-amber-200'
                 >Analytics</button>
+                    <button
+                    onClick={
+                        () => {
+                            setTimepermission(!timepermission)
+                            // set the timepermission in storage
+                            chrome.storage.sync.set({ timepermission: timepermission }, function () {
+                                console.log('Value is set to ' + timepermission);
+                            });  
+                            sendpermissionmessage(timepermission)  
+                        }
+                    }
+                    title="Open Pie Chart"
+                    className='font-extrabold hover:text-gray-600 active:text-amber-200'
+                >Pie Chart</button>
                 {isAnalyticsModalOpen && (
                     <AnalyticsModal isOpen={isAnalyticsModalOpen} onClose={closeModalAnalytics}>
                         {analyticsData.length > 0 ? (

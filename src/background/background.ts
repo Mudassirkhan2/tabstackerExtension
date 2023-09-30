@@ -1,7 +1,7 @@
 // Listen for the onInstalled event and open a new tab with the login page URL if the extension was just installed
 chrome.runtime.onInstalled.addListener(function (details) {
     if (details.reason === 'install') {
-        chrome.windows.create({ url: 'https://tabstacker.vercel.app/', type: 'normal' });
+        chrome.tabs.create({ url: 'https://tabstacker.vercel.app/' });
     }
 });
 
@@ -412,34 +412,34 @@ function startTimer(time, tabData) {
                         clearInterval(timerInterval); // Clear the timer when time is up
                         console.log('Timer has finished.');
                         console.log("holabola")
-                        const tabdatatitle=tabData.title
-                                chrome.storage.sync.get(['arrayOfMainWebsites'], (result) => {
-                                    if (!chrome.runtime.lastError) {
-                                        const arrayOfMainWebsites = result.arrayOfMainWebsites || [];
-                                        console.log('Fetched arrayOfMainWebsites:', arrayOfMainWebsites);
+                        const tabdatatitle = tabData.title
+                        chrome.storage.sync.get(['arrayOfMainWebsites'], (result) => {
+                            if (!chrome.runtime.lastError) {
+                                const arrayOfMainWebsites = result.arrayOfMainWebsites || [];
+                                console.log('Fetched arrayOfMainWebsites:', arrayOfMainWebsites);
 
-                                        // Find the index of tabData in arrayOfMainWebsites
-                                        const index = arrayOfMainWebsites.findIndex((item) => item['mainWebsites'] === tabData.mainWebsites);
-                                        console.log("index", index) 
+                                // Find the index of tabData in arrayOfMainWebsites
+                                const index = arrayOfMainWebsites.findIndex((item) => item['mainWebsites'] === tabData.mainWebsites);
+                                console.log("index", index)
 
-                                        if (index !== -1) {
-                                            // Remove tabData from arrayOfMainWebsites
-                                            arrayOfMainWebsites.splice(index, 1);
+                                if (index !== -1) {
+                                    // Remove tabData from arrayOfMainWebsites
+                                    arrayOfMainWebsites.splice(index, 1);
 
-                                            // Update the storage with the modified arrayOfMainWebsites
-                                            chrome.storage.sync.set({ 'arrayOfMainWebsites': arrayOfMainWebsites }, () => {
-                                                if (!chrome.runtime.lastError) {
-                                                    console.log('tabData removed from arrayOfMainWebsites and updated in storage.', arrayOfMainWebsites);
-                                                } else {
-                                                    console.error('Error updating arrayOfMainWebsites in storage:', chrome.runtime.lastError);
-                                                }
-                                            });
+                                    // Update the storage with the modified arrayOfMainWebsites
+                                    chrome.storage.sync.set({ 'arrayOfMainWebsites': arrayOfMainWebsites }, () => {
+                                        if (!chrome.runtime.lastError) {
+                                            console.log('tabData removed from arrayOfMainWebsites and updated in storage.', arrayOfMainWebsites);
+                                        } else {
+                                            console.error('Error updating arrayOfMainWebsites in storage:', chrome.runtime.lastError);
                                         }
-                                    } else {
-                                        console.error('Error fetching data from storage:', chrome.runtime.lastError);
-                                    }
-                                });
-                        chrome.tabs.sendMessage(activeTab.id, { tabDataTitle: tabdatatitle}, (response) => {
+                                    });
+                                }
+                            } else {
+                                console.error('Error fetching data from storage:', chrome.runtime.lastError);
+                            }
+                        });
+                        chrome.tabs.sendMessage(activeTab.id, { tabDataTitle: tabdatatitle }, (response) => {
                             if (chrome.runtime.lastError) {
                                 console.error('Error sending message to content script:', chrome.runtime.lastError);
                             } else {
@@ -578,3 +578,133 @@ async function getClickAnalytics() {
             throw error;
         });
 }
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.action === 'permissiongranted') {
+        console.log("permission granted")
+        const backendEndpointgettabs = `${baseUrl}/usertabs/getalltabsdata/${userId}`;
+        fetch(backendEndpointgettabs)
+            .then(response => response.json())
+            .then(data => {
+                const userDataArray = data;
+                console.log('Data retrieved:', userDataArray);
+
+                let currentTabTitle = null;
+                let timerInterval = null;
+                let minutes = 0;
+                let seconds = 0;
+
+                // Function to start the timer
+                function startTimer() {
+                    // Clear any existing timer
+                    clearInterval(timerInterval);
+
+                    let elapsedTime = 0; // Initialize the elapsed time to 0 milliseconds
+
+                    timerInterval = setInterval(() => {
+                        // Check if the tab title has changed (user switched tabs)
+                        chrome.tabs.query({ active: true }, (tabs) => {
+                            const activeTab = tabs[0];
+                            if (!activeTab || activeTab.title !== currentTabTitle) {
+                                stopTimer(seconds, minutes);
+                                return;
+                            }
+
+                            elapsedTime += 1000; // Increment elapsed time by 1 second
+
+                            minutes = Math.floor(elapsedTime / 60000);
+                            seconds = + ((elapsedTime % 60000) / 1000).toFixed(0);
+
+                            console.log(`Timer is running... ${minutes}:${seconds}`);
+                            // return the minutes and seconds data to the stopTimer function
+
+
+                        });
+                    }, 1000);
+
+                    console.log('Timer started.');
+                }
+
+                // Function to stop the timer
+                function stopTimer(seconds, minutes) {
+                    //convert minutes and seconds to one variable
+                    const time = (minutes * 60) + seconds;
+                    console.log('Timer stopped.', time);
+
+                    // fetch the object with current tabTile from userDataArray
+                    const userTab = userDataArray.find(userTab => userTab.tabTitle === currentTabTitle);
+                    // fetch the folderId and the tabId and the userId from the userTab object
+                    const folderId = userTab.folderId;
+                    const tabId = userTab.tabId;
+                    const userId = userTab.userId;
+                    console.log("folderId, tabId, userId", folderId, tabId, userId)
+                    // Send the time to the backend via api `http://localhost:8000/usertabstrack-time/${userId}/${folderId}/${tabId}`
+                    const backendEndpointtractime = `${baseUrl}/usertabs/track-time/${userId}/${folderId}/${tabId}`;
+                    fetch(backendEndpointtractime, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ time })
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log('Data retrieved:', data);
+                        })
+                        .catch(error => {
+                            console.error('Error fetching data:', error);
+                            // Handle the error
+                        });
+                    clearInterval(timerInterval);
+                    minutes = 0;
+                    seconds = 0;
+                    timerInterval = null;
+
+                }
+
+                // Listen for tab activation
+                chrome.tabs.onActivated.addListener((activeInfo) => {
+                    console.log('Tab activated:', activeInfo);
+                    chrome.tabs.get(activeInfo.tabId, (tab) => {
+                        const tabTitle = tab.title;
+                        console.log("Bhola mere",userDataArray, tabTitle)
+                        const userTab = userDataArray.find(userTab => userTab.tabTitle === tabTitle);
+                        if (userTab) {
+                            if (tabTitle !== currentTabTitle && currentTabTitle!==null) {
+                                // Stop the timer and send data
+                                stopTimer(seconds, minutes);
+                            }
+
+                            // Set the current tab title
+                            currentTabTitle = tabTitle;
+
+                            // Start the timer when there's a match
+                            startTimer();
+                            if (tabTitle !== currentTabTitle) {
+                                // Stop the timer and send data
+                                stopTimer(seconds, minutes);
+                            }
+                        } else {
+                            // The tab title doesn't match any titles in userDataArray, so stop the timer
+                            stopTimer(seconds, minutes);
+                        }
+                        // Check if the tab title exists in userDataArray
+
+                    });
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+                // Handle the error
+            });
+    } else if (message.action === 'permissiondenied') {
+        console.log("permission denied")
+        // Handle permission denied
+    }
+});
+
+
+
+
+// Listen for tab deactivation (switching to another tab)
+//http://localhost:8000/usertabs/getalltabsdata/:userId
