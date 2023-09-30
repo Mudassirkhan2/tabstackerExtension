@@ -41,7 +41,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             setTimeout(() => {
               popup.style.display = 'none';
             }, 3000);    
-    alert(`Received title: ${title}`);
+    // alert(`Received title: ${title}`);
 
     // You can perform any other actions you want with the received title here.
   }
