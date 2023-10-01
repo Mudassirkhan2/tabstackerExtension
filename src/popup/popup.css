@@ -1,6 +1,6 @@
 body {
     /* background-color: #8EC5FC; */
-    background-color: aliceblue;
+    background-color: rgb(255, 255, 255);
     /* background-image: linear-gradient(62deg, #8EC5FC 0%, #E0C3FC 100%); */
     font-size: 1rem;
     font-weight: bold;
@@ -44,7 +44,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    border: 1px solid #d07171;
+    border: 1px solid #444444;
     margin-bottom: 0.5rem;
     border-radius: 10px;
   }
@@ -74,7 +74,7 @@ body {
   }
  
   .selected {
-    background-color: beige;
+    background-color: aliceblue;
     color: black;
     scale: 0.99;
     transition: all 0.2s ease-in-out;
@@ -109,7 +109,7 @@ body {
 
 /* Thumb (the draggable part) */
 ::-webkit-scrollbar-thumb {
-  background: #007bff; /* Color of the thumb (a nice blue) */
+  background: #ffffff; /* Color of the thumb (a nice blue) */
 }
 
 

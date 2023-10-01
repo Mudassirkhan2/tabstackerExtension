@@ -21,7 +21,27 @@ const Navbar = () => {
     const [analyticsData, setAnalyticsData] = useState([]);
     // pie chartData
     const [pieChartData, setPieChartData] = useState([]);
-    const [timepermission, setTimepermission] = useState(null);
+    let localtime = 'false'
+    const localtime1 = window.localStorage.getItem("timepermission");
+    localtime1 && (localtime = localtime1);
+
+    const [timepermission, setTimepermission] = useState(localtime);
+
+    useEffect(() => {
+        if (timepermission == 'true') {
+            //send message to background.js
+            chrome.runtime.sendMessage({ action: 'permissiongranted' });
+        }
+        else if (timepermission == 'false') {
+            //send message to background.js
+            chrome.runtime.sendMessage({ action: 'permissiondenied' });
+        }
+
+        console.log("now", timepermission);
+
+    }, [timepermission]);
+
+
     useEffect(() => {
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
             setTheme('light')
@@ -41,7 +61,7 @@ const Navbar = () => {
         //     chrome.runtime.sendMessage({ action: 'permissiongranted' });
         // }        
     }, [])
-    console.log(timepermission)
+
     useEffect(() => {
         chrome.tabs.query({}, (tabs) => {
             // get limit from storage
@@ -129,14 +149,28 @@ const Navbar = () => {
     const handleLimitChange = (event) => {
         setlimit(event.target.value);
     };
-    const sendpermissionmessage = (timepermission) => {
+    // const sendpermissionmessage = (timepermission) => {
 
-        if (timepermission) {
-            chrome.runtime.sendMessage({ action: 'permissiongranted' });
-        } else {
-            chrome.runtime.sendMessage({ action: 'permissiondenied' });
+    //     if (timepermission) {
+    //         chrome.runtime.sendMessage({ action: 'permissiongranted' });
+    //     } else {
+    //         chrome.runtime.sendMessage({ action: 'permissiondenied' });
+    //     }
+    // };
+
+    const handletime = () => {
+        if (timepermission == 'true') {
+            setTimepermission('false');
+            window.localStorage.setItem("timepermission", 'false');
+
         }
-    };
+        else if (timepermission == 'false') {
+            setTimepermission('true');
+            window.localStorage.setItem("timepermission", 'true');
+        }
+    }
+
+
     return (
         <nav className='flex items-center justify-between p-4 border-b-2 '>
 
@@ -160,17 +194,18 @@ const Navbar = () => {
                     }
                     title="Open Analytics modal"
                     className='font-extrabold hover:text-gray-600 active:text-amber-200'
-                >Pie Analytics</button>
+                >Folder Analytics</button>
                 <button
                     onClick={
                         () => {
+
                             getClickAnalytics()
                             openModalAnalytics()
                         }
                     }
                     title="Open Analytics modal"
                     className='font-extrabold hover:text-gray-600 active:text-amber-200'
-                >Analytics</button>
+                >Tab Analytics</button>
                 {isPieChartModalOpen && (
                     <AnalyticsModal isOpen={isPieChartModalOpen} onClose={closePieChartModalAnalytics}>
                         {pieChartData.length > 0 ? (
@@ -183,19 +218,17 @@ const Navbar = () => {
                     </AnalyticsModal>
                 )}
                 <button
-                    onClick={
-                        () => {
-                            setTimepermission(!timepermission)
-                            // set the timepermission in storage
-                            chrome.storage.sync.set({ timepermission: timepermission }, function () {
-                                console.log('Value is set to ' + timepermission);
-                            });
-                            sendpermissionmessage(timepermission)
-                        }
-                    }
+                    onClick={handletime}
                     title="Open Pie Chart"
                     className='font-extrabold hover:text-gray-600 active:text-amber-200'
-                >Pie Chart</button>
+                    style={{
+                        backgroundColor: timepermission === 'true' ? 'green' : '',
+                        color: theme === 'dark' ? 'white' : 'black',
+                    }}
+                >
+                    Time-track-permission
+                </button>
+
 
                 {isAnalyticsModalOpen && (
                     <AnalyticsModal isOpen={isAnalyticsModalOpen} onClose={closeModalAnalytics}>
