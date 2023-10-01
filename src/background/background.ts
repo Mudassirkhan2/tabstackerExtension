@@ -623,130 +623,145 @@ async function getPieChartAnalytics() {
             throw error;
         });
 }
-
+let permissionGrantedNew = false;
+let timerIntervalNew = null;
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    if (message.action === 'permissiongranted') {
-        console.log("permission granted")
-        const backendEndpointgettabs = `${baseUrl}/usertabs/getalltabsdata/${userId}`;
-        fetch(backendEndpointgettabs)
+    let currentTabTitleNew = null;
+    
+    let minutesNew = 0;
+    let secondsNew = 0;
+    let userDataArrayNew = [];
+
+
+    function startTimerNew() {
+        if (permissionGrantedNew === true) {
+            if (timerIntervalNew) {
+                clearInterval(timerIntervalNew);
+            }
+
+            let elapsedTimeNew = 0;
+
+            timerIntervalNew = setInterval(() => {
+                chrome.tabs.query({ active: true }, (tabs) => {
+                    const activeTabNew = tabs[0];
+                    if (!activeTabNew || activeTabNew.title !== currentTabTitleNew) {
+                        stopTimerNew();
+                        return;
+                    }
+
+                    elapsedTimeNew += 1000;
+
+                    minutesNew = Math.floor(elapsedTimeNew / 60000);
+                    secondsNew = +((elapsedTimeNew % 60000) / 1000).toFixed(0);
+                    if (permissionGrantedNew === true) {
+                        console.log(`Timer is running... ${minutesNew}:${secondsNew}`);
+                        console.log(permissionGrantedNew)
+                    }
+                });
+            }, 1000);
+
+            console.log('Timer started.');
+        }
+    }
+
+    function stopTimerNew() {
+        const timeNew = (minutesNew * 60) + secondsNew;
+        console.log('Timer stopped.', timeNew);
+
+        const userTabNew = userDataArrayNew.find((userTab) => userTab.tabTitle === currentTabTitleNew);
+        if (!userTabNew) {
+            console.log('User tab not found in userDataArray.');
+            return;
+        }
+
+        const folderIdNew = userTabNew.folderId;
+        const tabIdNew = userTabNew.tabId;
+        const userIdNew = userTabNew.userId;
+        console.log("folderId, tabId, userId", folderIdNew, tabIdNew, userIdNew);
+
+        const backendEndpointTrackTimeNew = `${baseUrl}/usertabs/track-time/${userIdNew}/${folderIdNew}/${tabIdNew}`;
+        fetch(backendEndpointTrackTimeNew, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ time: timeNew })
+        })
             .then(response => response.json())
             .then(data => {
-                const userDataArray = data;
-                console.log('Data retrieved:', userDataArray);
-
-                let currentTabTitle = null;
-                let timerInterval = null;
-                let minutes = 0;
-                let seconds = 0;
-
-                // Function to start the timer
-                function startTimer() {
-                    // Clear any existing timer
-                    clearInterval(timerInterval);
-
-                    let elapsedTime = 0; // Initialize the elapsed time to 0 milliseconds
-
-                    timerInterval = setInterval(() => {
-                        // Check if the tab title has changed (user switched tabs)
-                        chrome.tabs.query({ active: true }, (tabs) => {
-                            const activeTab = tabs[0];
-                            if (!activeTab || activeTab.title !== currentTabTitle) {
-                                stopTimer(seconds, minutes);
-                                return;
-                            }
-
-                            elapsedTime += 1000; // Increment elapsed time by 1 second
-
-                            minutes = Math.floor(elapsedTime / 60000);
-                            seconds = + ((elapsedTime % 60000) / 1000).toFixed(0);
-
-                            console.log(`Timer is running... ${minutes}:${seconds}`);
-                            // return the minutes and seconds data to the stopTimer function
-
-
-                        });
-                    }, 1000);
-
-                    console.log('Timer started.');
-                }
-
-                // Function to stop the timer
-                function stopTimer(seconds, minutes) {
-                    //convert minutes and seconds to one variable
-                    const time = (minutes * 60) + seconds;
-                    console.log('Timer stopped.', time);
-
-                    // fetch the object with current tabTile from userDataArray
-                    const userTab = userDataArray.find(userTab => userTab.tabTitle === currentTabTitle);
-                    // fetch the folderId and the tabId and the userId from the userTab object
-                    const folderId = userTab.folderId;
-                    const tabId = userTab.tabId;
-                    const userId = userTab.userId;
-                    console.log("folderId, tabId, userId", folderId, tabId, userId)
-                    // Send the time to the backend via api `http://localhost:8000/usertabstrack-time/${userId}/${folderId}/${tabId}`
-                    const backendEndpointtractime = `${baseUrl}/usertabs/track-time/${userId}/${folderId}/${tabId}`;
-                    fetch(backendEndpointtractime, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ time })
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                            console.log('Data retrieved:', data);
-                        })
-                        .catch(error => {
-                            console.error('Error fetching data:', error);
-                            // Handle the error
-                        });
-                    clearInterval(timerInterval);
-                    minutes = 0;
-                    seconds = 0;
-                    timerInterval = null;
-
-                }
-
-                // Listen for tab activation
-                chrome.tabs.onActivated.addListener((activeInfo) => {
-                    console.log('Tab activated:', activeInfo);
-                    chrome.tabs.get(activeInfo.tabId, (tab) => {
-                        const tabTitle = tab.title;
-                        console.log("Bhola mere", userDataArray, tabTitle)
-                        const userTab = userDataArray.find(userTab => userTab.tabTitle === tabTitle);
-                        if (userTab) {
-                            if (tabTitle !== currentTabTitle && currentTabTitle !== null) {
-                                // Stop the timer and send data
-                                stopTimer(seconds, minutes);
-                            }
-
-                            // Set the current tab title
-                            currentTabTitle = tabTitle;
-
-                            // Start the timer when there's a match
-                            startTimer();
-                            if (tabTitle !== currentTabTitle) {
-                                // Stop the timer and send data
-                                stopTimer(seconds, minutes);
-                            }
-                        } else {
-                            // The tab title doesn't match any titles in userDataArray, so stop the timer
-                            stopTimer(seconds, minutes);
-                        }
-                        // Check if the tab title exists in userDataArray
-
-                    });
-                });
+                console.log('Data retrieved:', data);
             })
             .catch(error => {
                 console.error('Error fetching data:', error);
-                // Handle the error
+            });
+
+        currentTabTitleNew = null;
+        if (timerIntervalNew) {
+            clearInterval(timerIntervalNew);
+        }
+        minutesNew = 0;
+        secondsNew = 0;
+        timerIntervalNew = null;
+
+        if (!currentTabTitleNew) {
+            return;
+        }
+        if (!permissionGrantedNew) {
+            return;
+        }
+    }
+
+    if (message.action === 'permissiongranted') {
+        console.log("permission granted");
+        permissionGrantedNew = true;
+        console.log("permissionbooleansetagain to true", permissionGrantedNew)
+        const backendEndpointGetTabsNew = `${baseUrl}/usertabs/getalltabsdata/${userId}`;
+        fetch(backendEndpointGetTabsNew)
+            .then(response => response.json())
+            .then(data => {
+                userDataArrayNew = data;
+                console.log('Data retrieved:', userDataArrayNew);
+
+                if (permissionGrantedNew) {
+                    chrome.tabs.onActivated.addListener((activeInfo) => {
+                        if (permissionGrantedNew === true) {
+                            console.log('Tab activated:', activeInfo);
+                            chrome.tabs.get(activeInfo.tabId, (tabNew) => {
+                                const tabTitleNew = tabNew.title;
+                                console.log(userDataArrayNew, tabTitleNew);
+                                const userTabNew = userDataArrayNew.find((userTab) => userTab.tabTitle === tabTitleNew);
+                                if (userTabNew) {
+                                    if (tabTitleNew !== currentTabTitleNew && currentTabTitleNew !== null) {
+                                        stopTimerNew();
+                                    }
+
+                                    currentTabTitleNew = tabTitleNew;
+
+                                    startTimerNew();
+                                    if (tabTitleNew !== currentTabTitleNew) {
+                                        stopTimerNew();
+                                    }
+                                } else {
+                                    stopTimerNew();
+                                }
+                            });
+                        };
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
             });
     } else if (message.action === 'permissiondenied') {
-        console.log("permission denied")
-        // Handle permission denied
+        console.log("permission denied");
+        //clear timeintervalnew
+        clearInterval(timerIntervalNew);
+        stopTimerNew();
+        permissionGrantedNew = false;
+        console.log("permissionbooleansetagain to false", permissionGrantedNew)
     }
 });
+
 
 
 
