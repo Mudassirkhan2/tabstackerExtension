@@ -1,83 +1,83 @@
 body {
-    /* background-color: #8EC5FC; */
-    background-color: rgb(255, 255, 255);
-    /* background-image: linear-gradient(62deg, #8EC5FC 0%, #E0C3FC 100%); */
-    font-size: 1rem;
-    font-weight: bold;
-    margin: 0 auto;
-  }
-  
-  img {
-    height: 2rem;
-    width: 2rem;
-    border-radius: 5px;
-  }
- 
-  
-  #tabList {
-    list-style-type: none;
-    padding: 0;
-    display: flex;
-    /* flex-wrap: wrap; */
-    flex-direction: column;
-    /* gap: 0.5rem; */
-    max-height: 80vh;
-    overflow-y: scroll;
-    /* align-items: center; */
-  }
+  /* background-color: #8EC5FC; */
+  background-color: rgb(255, 255, 255);
+  /* background-image: linear-gradient(62deg, #8EC5FC 0%, #E0C3FC 100%); */
+  font-size: 1rem;
+  font-weight: bold;
+  margin: 0 auto;
+}
 
-  .container {
-    display: flex;
-    gap: 1rem;
-    padding: 0.3rem;
-    min-height: 90vh;
-  }
+img {
+  height: 2rem;
+  width: 2rem;
+  border-radius: 5px;
+}
 
-  .leftbar {
-    display: flex;
-    flex-direction: column;
-    height: 90vh;
-  }
 
-  .leftbar>div {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border: 1px solid #444444;
-    margin-bottom: 0.5rem;
-    border-radius: 10px;
-  }
+#tabList {
+  list-style-type: none;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 80vh;
+  overflow-y: scroll;
+  align-items: center;
+}
 
-  li {
-    /* margin-bottom: 1rem; */
-    padding: 1rem;
-    /* border: 1px solid black; */
-    /* border-radius: 5px; */
-    width: 450px;
-  }
+.container {
+  display: flex;
+  gap: 1rem;
+  padding: 0.3rem;
+  min-height: 90vh;
+}
 
-  a {
-    text-decoration: none;
-    color: black;
-  }
+.leftbar {
+  display: flex;
+  flex-direction: column;
+  height: 90vh;
+}
 
-  span {
-    display: flex;
-    align-items: center;
-  }
+.leftbar>div {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid #444444;
+  margin-bottom: 0.5rem;
+  border-radius: 10px;
+}
 
- 
-  .leftbar {
-    width: 25%;
-    min-width: 25%;
-  }
- 
-  .selected {
-    background-color: aliceblue;
-    color: black;
-    scale: 0.99;
-    transition: all 0.2s ease-in-out;
+li {
+  /* margin-bottom: 1rem; */
+  padding: 1rem;
+  /* border: 1px solid black; */
+  /* border-radius: 5px; */
+  width: 450px;
+}
+
+a {
+  text-decoration: none;
+  color: black;
+}
+
+span {
+  display: flex;
+  align-items: center;
+}
+
+
+.leftbar {
+  width: 25%;
+  min-width: 25%;
+}
+
+.selected {
+  background-color: aliceblue;
+  color: black;
+  scale: 0.99;
+  transition: all 0.2s ease-in-out;
 }
 
 
@@ -94,22 +94,27 @@ body {
   gap: 0.5rem;
   align-items: center;
 }
-.title{
+
+.title {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
-.rightbar{
+
+.rightbar {
   width: inherit;
 }
+
 /* Track (the background) */
 ::-webkit-scrollbar-track {
-  background: aliceblue; /* Background color of the track */
+  background: aliceblue;
+  /* Background color of the track */
 }
 
 /* Thumb (the draggable part) */
 ::-webkit-scrollbar-thumb {
-  background: #ffffff; /* Color of the thumb (a nice blue) */
+  background: #ffffff;
+  /* Color of the thumb (a nice blue) */
 }
 
 
@@ -137,23 +142,27 @@ body {
 
 /* Hide the scrollbar track and thumb */
 ::-webkit-scrollbar {
-  width: 8px; /* Set a very small width */
+  width: 8px;
+  /* Set a very small width */
 }
 
 /* Track (the background) - make it transparent */
 ::-webkit-scrollbar-track {
-  background: transparent; /* Set background to transparent */
+  background: transparent;
+  /* Set background to transparent */
 }
 
 /* Thumb (the draggable part) */
 ::-webkit-scrollbar-thumb {
-  background: transparent; /* Set thumb background to transparent */
-  border-radius: 0; /* Remove any border radius on the thumb */
+  background: transparent;
+  /* Set thumb background to transparent */
+  border-radius: 0;
+  /* Remove any border radius on the thumb */
 }
 
 
 input[type="number"]::-webkit-inner-spin-button,
-    input[type="number"]::-webkit-outer-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-    }
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}

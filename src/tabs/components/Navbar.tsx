@@ -224,6 +224,7 @@ const Navbar = () => {
                     style={{
                         backgroundColor: timepermission === 'true' ? 'green' : '',
                         color: theme === 'dark' ? 'white' : 'black',
+                        borderRadius: '5px',
                     }}
                 >
                     Time-track-permission

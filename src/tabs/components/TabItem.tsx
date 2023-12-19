@@ -92,7 +92,7 @@ const TabItem = (
 
     const mainSiteName = getMainSiteName(tab.url);
     return (
-        <li className="relative tab-item hover:bg-[#dcdcdc] rounded-xl dark:hover:bg-gray-400">
+        <li className="relative tab-item hover:bg-[#dcdcdc] border-gray-400 border-[1px]  rounded-xl dark:hover:bg-gray-400">
             <div className="tab-content">
                 <img
                     className="w-8 h-8 rounded-md "
@@ -113,13 +113,7 @@ const TabItem = (
                 </span>
                 <div className="absolute top-4 right-2">
                     <div className="flex items-center space-x-4">
-                        <img
-                            className="transition-all ease-in-out delay-150 close-icon hover:scale-125"
-                            src={closeIcon}
-                            alt="Close"
-                            onClick={() => closeTab(tab.id)}
-                            title="Close tab"
-                        />
+
                         <HiFolderPlus className="w-6 h-6 transition-all ease-in-out delay-150 rounded-md cursor-pointer active:text-emerald-300 hover:text-gray-600"
                             onClick={
                                 () => {
@@ -136,6 +130,13 @@ const TabItem = (
                             }
                             title="Set timer."
 
+                        />
+                        <img
+                            className="transition-all ease-in-out delay-150 close-icon hover:scale-125"
+                            src={closeIcon}
+                            alt="Close"
+                            onClick={() => closeTab(tab.id)}
+                            title="Close tab"
                         />
                         {isModalOpen && (
                             <Modal isOpen={isModalOpen} onClose={closeModal}>

@@ -35,7 +35,7 @@ const SavedTabsData = ({ tab, getFaviconUrl, currentFolder }) => {
     }
 
     return (
-        <li className="relative tab-item hover:bg-[#F5F5F5] rounded-xl dark:hover:bg-gray-400">
+        <li className="relative tab-item hover:bg-[#F5F5F5] rounded-xl dark:hover:bg-gray-400 border-gray-400 border-[1px] ">
             <div className="tab-content">
                 <img
                     className="w-8 h-8 rounded-md "

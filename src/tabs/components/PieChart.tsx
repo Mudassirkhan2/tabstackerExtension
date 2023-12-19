@@ -14,7 +14,7 @@ const PieChart = ({ data }) => {
         labels: data.map((item) => item.folderName),
         datasets: [
             {
-                label: "Click Count per site of saved folder tabs",
+                label: "Time Spent per site of saved folder tabs",
                 data: data.map((item) => item.timeSpent),
                 backgroundColor: [
                     "rgba(75,192,192,1)",

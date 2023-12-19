@@ -241,8 +241,8 @@ const Popup = () => {
                     <div className="rightbar ">
                         {isCurrentTab ? (
                             <>
-                                <h1 className="font-mono text-2xl">Current Tabs</h1>
-                                <ul id="tabList">
+                                <h1 className="mb-2 font-mono text-2xl">Current Tabs</h1>
+                                <ul id="tabList" className="gap-4">
                                     {tabData.map((tab) => (
                                         <TabItem
                                             key={tab.tabId}

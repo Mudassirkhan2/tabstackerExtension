@@ -2,7 +2,7 @@
     "manifest_version": 3,
     "name": "TabStacker",
     "description": "With TabStacker, you can effortlessly corral all your open tabs into a single, sleek page, decluttering your workspace",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "action": {
         "default_popup": "popup.html",
         "default_title": "TabStacker",
